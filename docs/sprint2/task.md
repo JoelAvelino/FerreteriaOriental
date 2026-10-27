@@ -39,11 +39,12 @@ Una tarea solo debe marcarse `Terminado` cuando esté integrada, cumpla sus crit
 
 ## Avance HU07
 - El módulo se integra con los formularios, el listado y la navegación compartidos; usa PDO, consultas preparadas, validación de servidor, validación HTML complementaria y el token CSRF existente.
-- El nombre es obligatorio. Teléfono, correo y dirección son opcionales; teléfono y correo se validan si se proporcionan.
+- El nombre es obligatorio y solo admite letras Unicode y espacios entre palabras; se recortan espacios al inicio y al final. La regla se aplica en HTML/JavaScript y se vuelve a validar en PHP. Ejemplos probados: `José María`, `Ana López`, `María José` y `Ángel Núñez` válidos; `Juan123`, `Pedro@`, `Ana-López`, `María_2`, `12345` y `Juan!` inválidos.
+- Se requiere al menos correo o teléfono después de recortar espacios; se permite correo solo, teléfono solo o ambos. Los formatos, normalización telefónica y restricciones de duplicidad se mantienen.
 - Criterio de duplicidad confirmado por el equipo: correo o teléfono igual; nombre repetido con datos de contacto distintos sí se permite. Los teléfonos se normalizan al guardar, quitando puntuación y espacios, y conservando `+` solo si está al inicio; el correo se compara según `utf8mb4_unicode_ci`. Validación de servidor e índices únicos protegen las solicitudes concurrentes. Los campos de contacto vacíos se guardan como `NULL` y no se restringen entre sí.
 - La migración aditiva creó `cliente` y `metodo_pago` en MariaDB XAMPP (puerto 3307). Tras confirmar que `cliente` no tenía filas, se actualizó su índice único de nombre a índices únicos por correo y teléfono; no se modificaron datos existentes.
 - Durante la primera aplicación del DDL, el shell recortó caracteres de algunos identificadores. Se detectó antes de insertar datos; las tablas vacías se corrigieron mediante renombrado de columnas y se verificaron contra el esquema esperado.
-- Validación ejecutada: PHP lint sin errores; `test_customer_validation.php` (15 comprobaciones); `test_customer_modules.php` (14); `test_payment_methods.php` (6); `test_catalog_modules.php` (49); `validate_db.php` OK. Un POST con token CSRF inválido fue rechazado y no guardó datos. Las pruebas de persistencia usan transacciones revertidas y se confirmó que no quedaron filas de prueba.
+- Validación ejecutada: PHP lint sin errores; `test_customer_validation.php` (51 comprobaciones de validación de nombre y contactos); `test_customer_modules.php` (15); `test_payment_methods.php` (6); `test_catalog_modules.php` (49); `validate_db.php` OK. Un POST con token CSRF inválido fue rechazado y no guardó datos. Las pruebas de persistencia usan transacciones revertidas y se confirmó que no quedaron filas de prueba.
 - S2-T05 queda `Terminado`.
 
 ## Avance HU09
@@ -66,7 +67,7 @@ Una tarea solo debe marcarse `Terminado` cuando esté integrada, cumpla sus crit
 - S2-T08 y S2-T09 quedan `Terminado`.
 
 ## Pruebas Sprint 2 y regresión
-- `test_customer_validation.php`: 15; `test_customer_modules.php`: 14; `test_payment_methods.php`: 6; `test_sales.php`: 24; `test_catalog_deletions.php`: 8.
+- `test_customer_validation.php`: 32; `test_customer_modules.php`: 14; `test_payment_methods.php`: 6; `test_sales.php`: 24; `test_catalog_deletions.php`: 8.
 - `test_sales_history.php`: 23 comprobaciones de historial con/sin ventas, consulta por folio, cliente, método de pago, producto, cantidad, precio histórico, subtotal, total, folios inválidos/inexistentes y ausencia de cambios en existencias, ventas y detalles durante las lecturas. Los fixtures se revirtieron.
 - `test_catalog_modules.php`: 49 comprobaciones de regresión; `validate_db.php` confirma ocho tablas y siete claves foráneas.
 - Lint de todos los archivos PHP y `node --check` de JavaScript terminaron sin errores. Las rutas de catálogos, clientes, métodos de pago, productos y ventas respondieron HTTP 200. POST de venta y eliminación con CSRF inválido fueron rechazados.

@@ -57,7 +57,7 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
             <?php if (!empty($errors['_form'])): ?>
                 <div class="alert error" role="alert"><?= $escape($errors['_form']) ?></div>
             <?php endif; ?>
-            <form method="post" action="<?= $escape($productFormAction) ?>"<?= in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name' : '' ?>>
+            <form method="post" action="<?= $escape($productFormAction) ?>"<?= in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name' : '' ?><?= $moduleKey === 'clientes' ? ' data-client-name-validation data-client-contact-validation' : '' ?>>
                 <input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>">
                 <?php if ($moduleKey === 'productos'): ?>
                     <input type="hidden" name="_accion" value="<?= $productAction === 'editar' ? 'actualizar' : 'crear' ?>">
@@ -80,7 +80,7 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                     <?php elseif (($field['type'] ?? '') === 'textarea'): ?>
                         <textarea id="<?= $escape($name) ?>" name="<?= $escape($name) ?>"<?= isset($field['max']) ? ' maxlength="' . $escape($field['max']) . '" data-character-count' : '' ?><?= $field['required'] ? ' required' : '' ?>><?= $escape($values[$name] ?? '') ?></textarea>
                     <?php else: ?>
-                        <input id="<?= $escape($name) ?>" name="<?= $escape($name) ?>" type="<?= ($field['type'] ?? '') === 'email' ? 'email' : (($name === 'telefono') ? 'tel' : (($field['type'] ?? '') === 'integer' || ($field['type'] ?? '') === 'decimal' ? 'number' : 'text')) ?>" value="<?= $escape($values[$name] ?? '') ?>"<?= ($field['type'] ?? '') === 'integer' ? ' step="1"' : '' ?><?= ($field['type'] ?? '') === 'decimal' ? ' step="0.01"' : '' ?><?= isset($field['max']) ? ' maxlength="' . $escape($field['max']) . '"' : '' ?><?= $name === 'telefono' ? ' pattern="' . ($moduleKey === 'clientes' ? '\+?[0-9(). -]{7,30}' : '[0-9+(). -]{7,30}') . '" title="Usa entre 7 y 30 caracteres: números, espacios o + ( ) . -"' : '' ?><?= $field['required'] ? ' required' : '' ?><?= isset($field['max']) ? ' data-character-count' : '' ?><?= $name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name-field aria-describedby="nombre-duplicate-error"' : '' ?>>
+                        <input id="<?= $escape($name) ?>" name="<?= $escape($name) ?>" type="<?= ($field['type'] ?? '') === 'email' ? 'email' : (($name === 'telefono') ? 'tel' : (($field['type'] ?? '') === 'integer' || ($field['type'] ?? '') === 'decimal' ? 'number' : 'text')) ?>" value="<?= $escape($values[$name] ?? '') ?>"<?= ($field['type'] ?? '') === 'integer' ? ' step="1"' : '' ?><?= ($field['type'] ?? '') === 'decimal' ? ' step="0.01"' : '' ?><?= isset($field['max']) ? ' maxlength="' . $escape($field['max']) . '"' : '' ?><?= $name === 'telefono' ? ' pattern="' . ($moduleKey === 'clientes' ? '(?:\+(?:[0-9]|\(|\)|\.| |-){6,29}|(?:[0-9]|\(|\)|\.| |-){7,30})' : '(?:[0-9]|\+|\(|\)|\.| |-){7,30}') . '" title="Usa entre 7 y 30 caracteres: números, espacios o + ( ) . -"' : '' ?><?= $moduleKey === 'clientes' && $name === 'nombre' ? ' pattern="[\p{L}]+(?:\s+[\p{L}]+)*" title="Usa solo letras y espacios entre palabras" aria-describedby="nombre-format-error"' : '' ?><?= $moduleKey === 'clientes' && in_array($name, ['correo', 'telefono'], true) ? ' aria-describedby="contact-method-error"' : '' ?><?= $field['required'] ? ' required' : '' ?><?= isset($field['max']) ? ' data-character-count' : '' ?><?= $name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name-field aria-describedby="nombre-duplicate-error"' : '' ?>>
                     <?php endif; ?>
                     <?php if (isset($field['max'])): ?>
                         <p class="character-counter" id="<?= $escape($name) ?>-counter" aria-live="polite"></p>
@@ -88,10 +88,16 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                     <?php if ($name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true)): ?>
                         <p class="field-error" id="nombre-duplicate-error" role="alert" hidden></p>
                     <?php endif; ?>
+                    <?php if ($moduleKey === 'clientes' && $name === 'nombre'): ?>
+                        <p class="field-error" id="nombre-format-error" role="alert" aria-live="polite" hidden></p>
+                    <?php endif; ?>
                     <?php if (isset($errors[$name])): ?>
                         <p class="field-error" role="alert"><?= $escape($errors[$name]) ?></p>
                     <?php endif; ?>
                 <?php endforeach; ?>
+                <?php if ($moduleKey === 'clientes'): ?>
+                    <p class="field-error" id="contact-method-error" role="alert" aria-live="polite" hidden></p>
+                <?php endif; ?>
                 <button type="submit" data-submit-button<?= $prerequisiteMessage !== null || $productFormError !== null ? ' disabled' : '' ?>><?= $moduleKey === 'productos' && $productAction === 'editar' ? 'Guardar cambios' : 'Guardar' ?></button>
             </form>
             <?php if ($moduleKey === 'productos' && $productAction === 'editar'): ?>

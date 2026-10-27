@@ -194,6 +194,7 @@ class CatalogService
         $definition = $this->requireModule($module);
         $values = [];
         $errors = [];
+        $hasClientContact = false;
 
         foreach ($definition['fields'] as $name => $field) {
             $rawValue = $input[$name] ?? '';
@@ -202,15 +203,26 @@ class CatalogService
                 continue;
             }
             $value = trim((string) $rawValue);
+            if ($module === 'clientes' && in_array($name, ['correo', 'telefono'], true) && $value !== '') {
+                $hasClientContact = true;
+            }
 
             if ($value === '') {
                 if ($field['required']) {
-                    $errors[$name] = $field['label'] . ' es obligatorio.';
+                    $errors[$name] = $module === 'clientes' && $name === 'nombre'
+                        ? 'El nombre del cliente es obligatorio.'
+                        : $field['label'] . ' es obligatorio.';
                 } elseif (($field['type'] ?? '') === 'integer') {
                     continue;
                 } else {
                     $values[$name] = null;
                 }
+                continue;
+            }
+
+            if ($module === 'clientes' && $name === 'nombre'
+                && !preg_match('/^[\p{L}]+(?:\s+[\p{L}]+)*$/u', $value)) {
+                $errors[$name] = 'El nombre solo puede contener letras y espacios entre palabras.';
                 continue;
             }
 
@@ -303,10 +315,15 @@ class CatalogService
         }
 
         if ($module === 'clientes') {
-            if (!isset($errors['telefono']) && $values['telefono'] !== null && $this->repository->clientPhoneExists($values['telefono'])) {
+            if (!$hasClientContact) {
+                $errors['_form'] = 'Debes proporcionar un correo electrónico o un número telefónico como mínimo';
+            }
+            $phone = $values['telefono'] ?? null;
+            $email = $values['correo'] ?? null;
+            if (!isset($errors['telefono']) && $phone !== null && $this->repository->clientPhoneExists($phone)) {
                 $errors['telefono'] = 'Este teléfono ya está registrado.';
             }
-            if (!isset($errors['correo']) && $values['correo'] !== null && $this->repository->clientEmailExists($values['correo'])) {
+            if (!isset($errors['correo']) && $email !== null && $this->repository->clientEmailExists($email)) {
                 $errors['correo'] = 'Este correo electrónico ya está registrado.';
             }
         }

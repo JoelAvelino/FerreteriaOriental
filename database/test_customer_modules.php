@@ -11,7 +11,7 @@ require __DIR__ . '/../app/Services/CatalogService.php';
 $config = require __DIR__ . '/../config/database.php';
 $connection = (new Database($config))->getConnection();
 $service = new CatalogService(new CatalogRepository($connection));
-$suffix = bin2hex(random_bytes(5));
+$suffix = strtr(bin2hex(random_bytes(5)), '0123456789abcdef', 'abcdefghijklmnop');
 $tests = 0;
 
 $assert = static function (bool $condition, string $message) use (&$tests): void {
@@ -101,18 +101,29 @@ try {
     ));
     $assert($sameNameCount === 2, 'No se permitieron clientes con el mismo nombre y contactos diferentes.');
 
-    [$optionalValues, $optionalErrors] = $service->validate('clientes', [
+    [, $missingContactErrors] = $service->validate('clientes', [
         'nombre' => 'Cliente opcional ' . $suffix,
         'telefono' => '',
         'correo' => '',
         'direccion' => '',
     ]);
-    $assert($optionalErrors === [], 'Se rechazaron campos de contacto vacíos.');
     $assert(
-        $optionalValues['telefono'] === null
-            && $optionalValues['correo'] === null
-            && $optionalValues['direccion'] === null,
-        'Los campos de contacto vacíos no se normalizaron a NULL.'
+        ($missingContactErrors['_form'] ?? null) === 'Debes proporcionar un correo electrónico o un número telefónico como mínimo',
+        'Se aceptó un cliente sin correo ni teléfono.'
+    );
+
+    [$emailOnlyValues, $emailOnlyErrors] = $service->validate('clientes', [
+        'nombre' => 'Cliente solo correo ' . $suffix,
+        'telefono' => '   ',
+        'correo' => 'solo-correo-' . $suffix . '@example.test',
+        'direccion' => '',
+    ]);
+    $assert($emailOnlyErrors === [], 'Se rechazó un cliente con solo correo.');
+    $assert(
+        $emailOnlyValues['telefono'] === null
+            && $emailOnlyValues['correo'] === 'solo-correo-' . $suffix . '@example.test'
+            && $emailOnlyValues['direccion'] === null,
+        'El contacto opcional/email-only no quedó normalizado correctamente.'
     );
 
     echo "Pruebas de persistencia de clientes: {$tests} comprobaciones OK." . PHP_EOL;

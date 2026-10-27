@@ -19,7 +19,8 @@ El Sprint 1 utiliza PHP, MySQL, PDO, HTML, CSS y JavaScript, dentro del entorno 
 
 ### HU07 — Clientes
 - Crear un formulario con nombre, teléfono, correo y dirección.
-- El nombre es obligatorio; validar formatos de teléfono y correo en el servidor y, como apoyo, en el navegador.
+- El nombre es obligatorio y solo admite letras Unicode y espacios entre palabras; recortar espacios exteriores y aplicar la validación tanto en el servidor como en el navegador.
+- Exigir al menos uno entre correo y teléfono luego de recortar espacios exteriores; permitir cualquiera de los dos o ambos. Mantener la validación de formato del correo, la validación y normalización telefónica y las reglas de duplicidad existentes en el servidor; reflejar la condición de contacto mínimo en el navegador.
 - Definir el criterio exacto de duplicidad con el equipo si no está documentado; no inventar una regla silenciosamente.
 - Al guardar, actualizar o volver al listado para que el nuevo cliente esté disponible en el formulario de venta.
 - Criterio confirmado: correo o teléfono duplicado; el teléfono se normaliza quitando puntuación y espacios y se conserva un `+` inicial. El nombre no es identificador único.

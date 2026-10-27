@@ -35,8 +35,8 @@ Atiende al cliente en mostrador y registra las operaciones de venta.
 - **Prioridad:** Alta
 
 **Criterios de aceptación**
-1. El formulario solicita nombre, teléfono, correo y dirección; el nombre es obligatorio.
-2. El teléfono y el correo se validan por formato.
+1. El formulario solicita nombre, teléfono, correo y dirección; el nombre es obligatorio y solo admite letras Unicode y espacios entre palabras, recortando los espacios al inicio y al final.
+2. Se debe proporcionar al menos un dato de contacto: correo electrónico, número telefónico o ambos. Si se proporciona correo o teléfono, se valida su formato; los espacios al inicio y al final se eliminan antes de validar.
 3. No se permite registrar un cliente duplicado.
 4. El cliente registrado aparece en el listado y queda disponible para seleccionarlo en una venta.
 
