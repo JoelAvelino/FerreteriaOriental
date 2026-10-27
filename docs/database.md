@@ -46,4 +46,6 @@ Las migraciones `20261026_create_client_and_payment_method.sql` y `20261027_cust
 
 La migración `20261028_create_sales_tables.sql` agrega ventas y detalle, con folio único, relaciones restrictivas y precio histórico. El folio se forma con `V-` seguido del identificador secuencial de venta rellenado a seis dígitos; un rollback puede dejar saltos en la secuencia. El precio unitario de cada detalle conserva el importe utilizado al registrar la venta.
 
-El esquema desplegado tiene ocho tablas y siete claves foráneas. El registro de venta y el descuento de inventario se ejecutan en una única transacción; la fila del producto se bloquea antes de comprobar existencias y el descuento incluye una condición adicional para impedir stock negativo. HU10 no se implementa en esta fase.
+HU10 reutiliza ese esquema sin cambios. El historial consulta `venta` con su cliente; el detalle se localiza por folio y relaciona `venta`, `cliente`, `metodo_pago`, `detalle_venta` y `producto`. `detalle_venta.precio_unitario` y `detalle_venta.subtotal` son la fuente histórica de importes; la consulta no escribe en ninguna tabla ni altera el stock.
+
+El esquema desplegado tiene ocho tablas y siete claves foráneas. El registro de venta y el descuento de inventario se ejecutan en una única transacción; la fila del producto se bloquea antes de comprobar existencias y el descuento incluye una condición adicional para impedir stock negativo. La consulta de historial y detalle de HU10 es independiente de ese flujo transaccional y solo lee datos.

@@ -2,7 +2,7 @@
 
 ## Alcance y entorno
 
-Esta guía cubre HU06, HU07, HU08 y HU09 en la aplicación PHP/PDO de Ferretería Oriental. Está preparada para la instancia MariaDB de XAMPP configurada en el puerto `3307` y la base `ferreteria_oriental`.
+Esta guía cubre HU06, HU07, HU08, HU09 y HU10 en la aplicación PHP/PDO de Ferretería Oriental. Está preparada para la instancia MariaDB de XAMPP configurada en el puerto `3307` y la base `ferreteria_oriental`.
 
 La guía usa únicamente datos ficticios. No se debe ejecutar `database/init_db.php` para preparar la demostración. Antes de empezar, confirma que Apache y MariaDB de XAMPP estén activos y que `php database/validate_db.php` termine con `Estado: OK`.
 
@@ -62,14 +62,25 @@ Usa la navegación de la aplicación para crear registros temporales relacionado
 6. En el catálogo, verifica que el stock del Producto A pasó de `5` a `3` y el del Producto B de `4` a `3`.
 7. El cálculo definitivo se realiza en el servidor; el precio unitario aplicado queda guardado en cada detalle.
 
-## 5. Rechazar una venta sin stock suficiente
+## 5. Consultar el historial y detalle de venta — HU10
+
+1. Abre `http://127.0.0.1/FerreteriaOriental/?modulo=historial_ventas`.
+2. Comprueba que el historial muestra folio, fecha, cliente y total; selecciona **Consultar detalle** para la venta ficticia creada en el paso anterior.
+3. Verifica los productos, cantidades, precios unitarios históricos, subtotales, total y método de pago. Los importes deben coincidir con los guardados al registrar la venta.
+4. Si necesitas demostrar que el precio es histórico, modifica temporalmente solo el precio de uno de los productos ficticios y vuelve a consultar el folio: el detalle debe conservar el precio registrado en la venta. Restaura después el precio del producto de demostración; no cambies el stock.
+5. Prueba `?modulo=historial_ventas&folio=folio-invalido` y `?modulo=historial_ventas&folio=V-999999999999`. La página debe explicar respectivamente que el formato no es válido y que no existe una venta con ese folio.
+6. En una base de demostración sin ventas, el historial debe indicar que aún no hay ventas registradas.
+
+Las operaciones de historial y detalle son exclusivamente de lectura; la verificación no debe cambiar filas de ventas, detalles ni existencias.
+
+## 6. Rechazar una venta sin stock suficiente
 
 1. En el formulario de ventas, selecciona el mismo cliente, método y Producto A.
 2. Solicita cantidad `99`, que supera las `3` unidades disponibles.
 3. Envía el formulario. La venta debe rechazarse y el mensaje debe indicar el stock disponible.
 4. Comprueba que el stock permanece en `3` y que no se genera una nueva venta/folio.
 
-## 6. Demostrar restricciones de eliminación — HU06
+## 7. Demostrar restricciones de eliminación — HU06
 
 En las siguientes pruebas confirma la acción del navegador para que la solicitud llegue al servidor. Las operaciones deben terminar rechazadas por las relaciones de integridad; no se elimina ningún registro vinculado.
 
@@ -78,7 +89,7 @@ En las siguientes pruebas confirma la acción del navegador para que la solicitu
 3. En Productos, intenta eliminar el Producto A. Como ya aparece en el detalle de la venta, debe indicar que no se puede eliminar un producto con ventas asociadas.
 4. Confirma que los tres registros siguen apareciendo. No elimines registros reales para esta demostración.
 
-## 7. Verificar regresión del Sprint 1
+## 8. Verificar regresión del Sprint 1
 
 1. Abre el catálogo de Productos y busca el nombre del Producto A de demostración.
 2. Filtra por la categoría ficticia y confirma que se muestran los productos correspondientes.

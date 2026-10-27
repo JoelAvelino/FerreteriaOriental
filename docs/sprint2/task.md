@@ -11,7 +11,7 @@ Una tarea solo debe marcarse `Terminado` cuando esté integrada, cumpla sus crit
 | ID | Tarea | Historia relacionada | Estado |
 |---|---|---|---|
 | S2-T01 | Revisar el código, esquema MySQL y documentación existentes del Sprint 1 | Todas | Terminado |
-| S2-T02 | Confirmar el alcance de HU10 y sus criterios de aceptación con el equipo/docente | HU10 | Pendiente |
+| S2-T02 | Confirmar el alcance de HU10 y sus criterios de aceptación con el equipo/docente | HU10 | Terminado |
 | S2-T03 | Revisar y acordar el modelo de datos para clientes, métodos de pago, ventas y detalle de venta, si aún no existe | HU07–HU09 | Terminado |
 | S2-T04 | Diseñar wireframe de registro/listado de clientes, si se solicita | HU07 | Pendiente |
 | S2-T05 | Implementar registro y listado de clientes con validaciones | HU07 | Terminado |
@@ -26,11 +26,13 @@ Una tarea solo debe marcarse `Terminado` cuando esté integrada, cumpla sus crit
 | S2-T14 | Implementar pruebas automatizadas para validaciones, relaciones, ventas, stock y rollback | HU06–HU09 | Terminado |
 | S2-T15 | Ejecutar pruebas de integración y regresión de Sprint 1 | Todas las definidas | Terminado |
 | S2-T16 | Actualizar documentación y preparar demostración del sprint | Todas las definidas | Terminado |
+| S2-T17 | Implementar el historial de ventas y el detalle por folio como consulta de solo lectura | HU10 | Terminado |
+| S2-T18 | Probar HU10 y documentar su demostración sin modificar datos reales | HU10 | Terminado |
 
 ## Dependencias y notas
 - HU08 depende de HU07 (clientes), HU09 (métodos de pago) y los productos con stock del Sprint 1.
 - HU06 debe respetar las relaciones existentes y no permitir eliminar productos que ya tengan ventas.
-- HU10 aparece mencionada en el documento de desglose como consulta del detalle de ventas, pero sus requisitos no están incluidos. No implementarla hasta confirmar el alcance.
+- El alcance web y criterios de HU10 quedaron confirmados: historial, consulta de detalle por folio, precios históricos y operaciones exclusivamente de lectura.
 - Los wireframes se indican «si se solicita» porque el documento proporcionado no establece explícitamente que sean entregables de este sprint.
 - No se incluyen estimaciones de duración porque el documento de Sprint 2 no las proporciona.
 - Las tareas son una propuesta inicial de descomposición técnica y deben validarse con el equipo antes de considerarlas comprometidas.
@@ -65,11 +67,18 @@ Una tarea solo debe marcarse `Terminado` cuando esté integrada, cumpla sus crit
 
 ## Pruebas Sprint 2 y regresión
 - `test_customer_validation.php`: 15; `test_customer_modules.php`: 14; `test_payment_methods.php`: 6; `test_sales.php`: 24; `test_catalog_deletions.php`: 8.
+- `test_sales_history.php`: 23 comprobaciones de historial con/sin ventas, consulta por folio, cliente, método de pago, producto, cantidad, precio histórico, subtotal, total, folios inválidos/inexistentes y ausencia de cambios en existencias, ventas y detalles durante las lecturas. Los fixtures se revirtieron.
 - `test_catalog_modules.php`: 49 comprobaciones de regresión; `validate_db.php` confirma ocho tablas y siete claves foráneas.
 - Lint de todos los archivos PHP y `node --check` de JavaScript terminaron sin errores. Las rutas de catálogos, clientes, métodos de pago, productos y ventas respondieron HTTP 200. POST de venta y eliminación con CSRF inválido fueron rechazados.
 - Las pruebas de integración crean fixtures ficticios dentro de transacciones y revierten los cambios; se comprobó que no quedaron filas de prueba.
-- La guía `docs/sprint2/demo.md` se contrastó con las pantallas, nombres de campos, mensajes, relaciones y pruebas actuales. Incluye datos ficticios, recorrido de las seis historias/módulos solicitados, previsualización y limpieza manual transaccional acotada; la limpieza no se ejecutó.
+- La guía `docs/sprint2/demo.md` se contrastó con las pantallas, nombres de campos, mensajes, relaciones y pruebas actuales. Incluye datos ficticios, recorrido de HU06–HU10, previsualización y limpieza manual transaccional acotada; la limpieza no se ejecutó.
+
+## Avance HU10
+- El módulo navegable de historial lista folio, fecha, cliente y total. El detalle se consulta por folio y muestra producto, cantidad, precio unitario histórico, subtotal, total, cliente y método de pago.
+- Se reutilizan las tablas existentes, PDO y consultas preparadas de solo lectura; no hay cambios de esquema ni escritura de existencias, ventas o detalles.
+- La vista comunica el historial vacío, folios inválidos e inexistentes y errores de consulta. La guía de demostración cubre los casos y recomienda usar solo datos ficticios.
+- `test_sales_history.php`: 23 comprobaciones OK; las seis suites de Sprint 2 y Sprint 1 también se ejecutaron correctamente.
+- S2-T17 y S2-T18 quedan `Terminado`.
 
 ## Pendientes
-- HU10 y la consulta del detalle de ventas continúan fuera del alcance confirmado.
-- Las tareas de wireframes siguen pendientes porque no se han definido como condición de aceptación o entregable de este sprint.
+- Las tareas de wireframes de Figma siguen pendientes y fuera de la responsabilidad de esta entrega web.

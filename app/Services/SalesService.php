@@ -25,6 +25,21 @@ class SalesService
         return $this->repository->formOptions();
     }
 
+    public function listSales(): array
+    {
+        return $this->repository->listSales();
+    }
+
+    public function findSaleByFolio(string $folio): ?array
+    {
+        $folio = trim($folio);
+        if (strlen($folio) > 32 || !preg_match('/^V-\d{6,}$/D', $folio)) {
+            throw new SalesException('El folio no es válido. Usa el formato V-000001.');
+        }
+
+        return $this->repository->findSaleByFolio($folio);
+    }
+
     public function validate(array $input): array
     {
         $errors = [];

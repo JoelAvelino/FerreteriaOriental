@@ -70,11 +70,22 @@ Atiende al cliente en mostrador y registra las operaciones de venta.
 
 **Dependencias:** Ninguna.
 
-## 4. Historia mencionada, pendiente de especificación
+## 4. HU10 — Consultar detalle de una venta
+- **Rol:** Vendedor
+- **Quiero:** Consultar el detalle de una venta.
+- **Para:** Conocer qué productos fueron vendidos, sus cantidades y precios.
+- **Prioridad:** Alta
 
-El documento de desglose menciona que el vendedor trabajará con las historias **HU07, HU08, HU09 y HU10**, y que una de las acciones del sprint es **consultar el detalle de las ventas realizadas**. Sin embargo, no proporciona el enunciado ni los criterios de aceptación de HU10.
+**Criterios de aceptación para el programa web**
+1. La navegación ofrece acceso al historial de ventas.
+2. El historial presenta folio, fecha, cliente y total disponibles, y permite abrir cada detalle.
+3. Si no existen ventas, se muestra un mensaje apropiado.
+4. Se puede consultar una venta por folio; un folio inválido o inexistente produce un mensaje claro sin romper la página.
+5. El detalle presenta cada producto, cantidad, precio unitario histórico y subtotal, además del total de la venta.
+6. El detalle presenta el cliente y el método de pago cuando estén disponibles.
+7. La consulta es exclusivamente de lectura; no modifica ventas, detalles ni existencias.
 
-No se deben inventar sus requisitos. Confirmar con el equipo o el docente si la consulta del detalle de ventas corresponde a HU10 y solicitar sus criterios de aceptación antes de implementarla.
+Esta entrega cubre únicamente el programa web. Los wireframes y cualquier tarea de Figma quedan fuera de responsabilidad y alcance.
 
 ## 5. Dependencias y orden sugerido
 1. Revisar el esquema y la implementación existente del Sprint 1.
@@ -82,7 +93,7 @@ No se deben inventar sus requisitos. Confirmar con el equipo o el docente si la 
 3. Implementar registro y listado de métodos de pago (HU09).
 4. Implementar eliminación segura de productos, proveedores y categorías (HU06), respetando relaciones y ventas.
 5. Implementar el registro de ventas y su detalle (HU08), incluyendo validación de existencias, cálculo de totales, folio y descuento de stock.
-6. Confirmar y especificar HU10 antes de desarrollar la consulta del detalle de ventas.
+6. Implementar la consulta de historial y detalle de ventas (HU10) con las tablas existentes, sin modificar el esquema.
 
 Este orden es orientativo y debe validarse con el equipo.
 

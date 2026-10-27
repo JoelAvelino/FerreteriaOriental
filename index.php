@@ -50,6 +50,49 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+if ($moduleKey === 'historial_ventas') {
+    $salesService = new SalesService(new SalesRepository($connection));
+    $modules = $service->modules();
+    $module = $service->getModule('historial_ventas');
+    $sales = [];
+    $sale = null;
+    $folioRequested = array_key_exists('folio', $_GET);
+    $historyError = null;
+
+    try {
+        $sales = $salesService->listSales();
+    } catch (Throwable $exception) {
+        error_log('Error al consultar el historial de ventas: ' . $exception->getMessage());
+        $historyError = 'No se pudo cargar el historial de ventas. Verifica la conexión e inténtalo nuevamente.';
+    }
+
+    if ($folioRequested) {
+        $rawFolio = $_GET['folio'];
+        if (!is_string($rawFolio)) {
+            http_response_code(400);
+            $historyError = 'El folio no es válido. Usa el formato V-000001.';
+        } else {
+            try {
+                $sale = $salesService->findSaleByFolio($rawFolio);
+                if ($sale === null) {
+                    http_response_code(404);
+                    $historyError = 'No se encontró una venta con ese folio.';
+                }
+            } catch (SalesException $exception) {
+                http_response_code(400);
+                $historyError = $exception->getMessage();
+            } catch (Throwable $exception) {
+                error_log('Error al consultar el detalle de venta: ' . $exception->getMessage());
+                http_response_code(500);
+                $historyError = 'No se pudo consultar el detalle de la venta. Verifica la conexión e inténtalo nuevamente.';
+            }
+        }
+    }
+
+    require __DIR__ . '/app/Views/sales_history.php';
+    exit;
+}
+
 if ($moduleKey === 'ventas') {
     $salesService = new SalesService(new SalesRepository($connection));
     $salesModule = $service->getModule('ventas');

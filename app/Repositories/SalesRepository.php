@@ -29,6 +29,47 @@ class SalesRepository
         ];
     }
 
+    public function listSales(): array
+    {
+        $statement = $this->connection->prepare(
+            'SELECT v.`folio`, v.`created_at`, c.`nombre` AS `cliente`, v.`total` '
+            . 'FROM `venta` v '
+            . 'INNER JOIN `cliente` c ON c.`id` = v.`id_cliente` '
+            . 'ORDER BY v.`created_at` DESC, v.`id` DESC'
+        );
+        $statement->execute();
+
+        return $statement->fetchAll();
+    }
+
+    public function findSaleByFolio(string $folio): ?array
+    {
+        $statement = $this->connection->prepare(
+            'SELECT v.`id`, v.`folio`, v.`created_at`, v.`total`, '
+            . 'c.`nombre` AS `cliente`, mp.`nombre` AS `metodo_pago` '
+            . 'FROM `venta` v '
+            . 'INNER JOIN `cliente` c ON c.`id` = v.`id_cliente` '
+            . 'INNER JOIN `metodo_pago` mp ON mp.`id` = v.`id_metodo_pago` '
+            . 'WHERE v.`folio` = :folio'
+        );
+        $statement->execute([':folio' => $folio]);
+        $sale = $statement->fetch();
+        if ($sale === false) {
+            return null;
+        }
+
+        $details = $this->connection->prepare(
+            'SELECT p.`nombre` AS `producto`, d.`cantidad`, d.`precio_unitario`, d.`subtotal` '
+            . 'FROM `detalle_venta` d '
+            . 'INNER JOIN `producto` p ON p.`id` = d.`id_producto` '
+            . 'WHERE d.`id_venta` = :venta ORDER BY d.`id`'
+        );
+        $details->execute([':venta' => $sale['id']]);
+        $sale['detalles'] = $details->fetchAll();
+
+        return $sale;
+    }
+
     public function transaction(callable $operation)
     {
         $ownsTransaction = !$this->connection->inTransaction();

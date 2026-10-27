@@ -52,8 +52,13 @@ El esquema desplegado contiene:
 
 Las claves foráneas restringen borrados que afectarían el historial. La definición completa está en `database/schema.sql`; las migraciones para bases existentes están en `database/migrations/`.
 
-## 5. HU10 — Consulta de detalle de ventas
-El documento de origen menciona consultar el detalle de ventas realizadas y enumera HU10, pero no incluye su historia ni criterios de aceptación. No diseñar ni implementar esa funcionalidad hasta que el equipo confirme su alcance.
+## 5. HU10 — Consulta de historial y detalle de ventas
+- Agregar un módulo navegable de historial, con una consulta de lectura de folio, fecha, cliente y total.
+- Consultar por folio validando su formato antes de ejecutar la consulta; mostrar estados distintos para formato inválido, folio inexistente y errores de persistencia.
+- Consultar la cabecera mediante `venta`, relacionando `cliente` y `metodo_pago`; recuperar las líneas desde `detalle_venta` y unir `producto` únicamente para mostrar el nombre.
+- Presentar cantidad, `detalle_venta.precio_unitario` y `detalle_venta.subtotal` como datos persistidos. No reconstruir precios ni subtotales usando el precio actual de `producto`.
+- Mantener todas las operaciones como lecturas PDO preparadas. No modificar ventas, detalles ni existencias.
+- Reutilizar la navegación, el repositorio y el servicio de ventas actuales. No se requieren migraciones, nuevas tablas ni tareas de Figma.
 
 ## 6. Seguridad y compatibilidad
 - Reutilizar PDO y consultas preparadas.

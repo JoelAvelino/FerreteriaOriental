@@ -8,7 +8,7 @@ Sistema de información para apoyar el control de inventario y las ventas de una
 - HU07 de Sprint 1 aprobada e implementada: registro de productos relacionado con categoría, marca y proveedor.
 - HU01 y HU02 implementadas: catálogo con búsqueda/filtros y edición de los campos documentados.
 - HU06–HU09 de Sprint 2 implementadas: eliminaciones seguras, clientes, métodos de pago y ventas con descuento transaccional de existencias.
-- HU10 y la consulta de detalle de ventas continúan pendientes de confirmación de alcance.
+- HU10 implementada: historial de ventas y consulta de detalle por folio con precios históricos y operaciones de solo lectura.
 - Formularios con validación en cliente y servidor, persistencia PDO, protección CSRF y rechazo de duplicados.
 - Interfaces HTML con estilos en CSS y mejoras de interacción en JavaScript.
 
@@ -52,9 +52,10 @@ Sistema de información para apoyar el control de inventario y las ventas de una
    `php database/test_customer_modules.php`
    `php database/test_payment_methods.php`
    `php database/test_sales.php`
+   `php database/test_sales_history.php`
    `php database/test_catalog_deletions.php`
 
-Abre `http://localhost/FerreteriaOriental/` y selecciona Categorías, Marcas, Proveedores, Productos, Clientes, Métodos de pago o Ventas. El módulo Productos permite registrar, consultar, filtrar, editar y eliminar productos. Para registrar productos, primero debe existir al menos una categoría, marca y proveedor. La configuración usa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` si están definidas; el puerto local predeterminado de este proyecto es 3307.
+Abre `http://localhost/FerreteriaOriental/` y selecciona Categorías, Marcas, Proveedores, Productos, Clientes, Métodos de pago, Ventas o Historial de ventas. El módulo Productos permite registrar, consultar, filtrar, editar y eliminar productos. Para registrar productos, primero debe existir al menos una categoría, marca y proveedor. La configuración usa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` si están definidas; el puerto local predeterminado de este proyecto es 3307.
 
 ## Documentación del Sprint 2
 
@@ -71,7 +72,8 @@ Los requerimientos, el diseño técnico y las tareas del segundo sprint se docum
 - **HU07:** registro de clientes.
 - **HU08:** registro de ventas, incluyendo cliente, método de pago y productos vendidos.
 - **HU09:** registro de métodos de pago.
+- **HU10:** historial y consulta de detalle de ventas por folio, en modo de solo lectura.
 
 Las funcionalidades reutilizan la arquitectura y las relaciones existentes; las pruebas y el estado del Sprint 2 se documentan en `docs/sprint2/task.md`.
 
-**Nota:** la consulta del detalle de ventas también aparece mencionada en el documento de desglose del Sprint 2, pero su historia de usuario y sus criterios de aceptación deben confirmarse con el equipo antes de implementarla.
+La HU10 reutiliza el esquema de ventas existente; no requiere inicializar la base ni aplicar migraciones.

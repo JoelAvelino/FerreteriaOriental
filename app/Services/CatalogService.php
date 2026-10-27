@@ -61,6 +61,12 @@ class CatalogService
             'fields' => [],
             'show_listing' => false,
         ],
+        'historial_ventas' => [
+            'title' => 'Historial de ventas',
+            'table' => 'venta',
+            'fields' => [],
+            'show_listing' => false,
+        ],
         'productos' => [
             'title' => 'Productos',
             'form_title' => 'Registrar producto',

@@ -251,6 +251,21 @@ th {
     gap: .5rem;
 }
 
+.sale-detail-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: .8rem 1rem;
+    margin: 0 0 1rem;
+}
+
+.sale-detail-meta dt {
+    font-weight: 700;
+}
+
+.sale-detail-meta dd {
+    margin: .25rem 0 0;
+}
+
 @media (max-width: 760px) {
     .columns {
         grid-template-columns: 1fr;
