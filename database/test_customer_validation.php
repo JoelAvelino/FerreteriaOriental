@@ -14,12 +14,12 @@ class CustomerValidationRepository extends CatalogRepository
 
     public function clientPhoneExists(string $phone): bool
     {
-        return in_array($phone, ['+15550999', '+15550100'], true);
+        return in_array($phone, ['9511234567', '9511234568'], true);
     }
 
     public function clientEmailExists(string $email): bool
     {
-        return $email === 'duplicado@example.test';
+        return $email === 'duplicado@gmail.com';
     }
 
     public function paymentMethodNameExists(string $name): bool
@@ -40,19 +40,19 @@ $assert = static function (bool $condition, string $message) use (&$tests): void
 
 [$validValues, $validErrors] = $service->validate('clientes', [
     'nombre' => 'Cliente de prueba',
-    'telefono' => '+1 555-0111',
-    'correo' => 'cliente@example.test',
+    'telefono' => '9511234569',
+    'correo' => 'cliente@gmail.com',
     'direccion' => 'Dirección ficticia de prueba',
 ]);
 $assert($validErrors === [], 'Se rechazaron datos válidos de cliente.');
 $assert($validValues['nombre'] === 'Cliente de prueba', 'No se conservó el nombre validado.');
-$assert($validValues['telefono'] === '+15550111', 'No se normalizó el teléfono conservando el prefijo +.');
+$assert($validValues['telefono'] === '9511234569', 'No se conservó el teléfono de 10 dígitos.');
 
 foreach (['José María', 'Ana López', 'María José', 'Ángel Núñez', '  José María  '] as $index => $validName) {
     [$nameValues, $nameErrors] = $service->validate('clientes', [
         'nombre' => $validName,
         'telefono' => '',
-        'correo' => 'nombre-valido-' . $index . '@example.test',
+        'correo' => 'nombre-valido-' . $index . '@gmail.com',
         'direccion' => '',
     ]);
     $assert($nameErrors === [], 'Se rechazó un nombre válido: ' . $validName);
@@ -61,33 +61,33 @@ foreach (['José María', 'Ana López', 'María José', 'Ángel Núñez', '  Jos
 
 $contactCases = [
     [
-        'correo' => 'solo-correo@example.test',
+        'correo' => 'solo-correo@gmail.com',
         'telefono' => '',
         'expectedPhone' => null,
-        'expectedEmail' => 'solo-correo@example.test',
+        'expectedEmail' => 'solo-correo@gmail.com',
     ],
     [
         'correo' => '',
-        'telefono' => '+1 555-0123',
-        'expectedPhone' => '+15550123',
+        'telefono' => '9511234001',
+        'expectedPhone' => '9511234001',
         'expectedEmail' => null,
     ],
     [
-        'correo' => 'ambos@example.test',
-        'telefono' => '+1 555-0124',
-        'expectedPhone' => '+15550124',
-        'expectedEmail' => 'ambos@example.test',
+        'correo' => 'ambos@gmail.com',
+        'telefono' => '9511234002',
+        'expectedPhone' => '9511234002',
+        'expectedEmail' => 'ambos@gmail.com',
     ],
     [
-        'correo' => '  solo-trim@example.test  ',
+        'correo' => '  solo-trim@gmail.com  ',
         'telefono' => '   ',
         'expectedPhone' => null,
-        'expectedEmail' => 'solo-trim@example.test',
+        'expectedEmail' => 'solo-trim@gmail.com',
     ],
     [
         'correo' => '',
-        'telefono' => '  +1 555-0125  ',
-        'expectedPhone' => '+15550125',
+        'telefono' => '9511234003',
+        'expectedPhone' => '9511234003',
         'expectedEmail' => null,
     ],
 ];
@@ -131,8 +131,8 @@ foreach (['Juan123', 'Pedro@', 'Ana-López', 'María_2', '12345', 'Juan!'] as $i
 
 [, $sameNameErrors] = $service->validate('clientes', [
     'nombre' => 'Cliente de prueba',
-    'telefono' => '+1 555-0101',
-    'correo' => 'otro@example.test',
+    'telefono' => '9511234010',
+    'correo' => 'otro@gmail.com',
     'direccion' => '',
 ]);
 $assert($sameNameErrors === [], 'Se rechazó un nombre repetido con contacto distinto.');
@@ -156,7 +156,7 @@ $assert(isset($invalidPhoneErrors['telefono']), 'Se aceptó un teléfono con for
 
 [, $invalidPhonePrefixErrors] = $service->validate('clientes', [
     'nombre' => 'Cliente de prueba',
-    'telefono' => '123+4567',
+    'telefono' => '123+456789',
     'correo' => '',
     'direccion' => '',
 ]);
@@ -188,27 +188,119 @@ $assert(isset($invalidPhoneOnlyErrors['telefono']), 'Se aceptó un teléfono inv
 
 [, $duplicatePhoneErrors] = $service->validate('clientes', [
     'nombre' => 'Otro cliente',
-    'telefono' => '+1 (555) 0999',
-    'correo' => 'otro@example.test',
+    'telefono' => '9511234567',
+    'correo' => 'otro@gmail.com',
     'direccion' => '',
 ]);
 $assert(isset($duplicatePhoneErrors['telefono']), 'No se rechazó un teléfono de cliente duplicado.');
 
 [, $formattedDuplicatePhoneErrors] = $service->validate('clientes', [
     'nombre' => 'Otro cliente',
-    'telefono' => '+1 (555) 0100',
-    'correo' => 'distinto@example.test',
+    'telefono' => '951 123 4568',
+    'correo' => 'distinto@gmail.com',
     'direccion' => '',
 ]);
-$assert(isset($formattedDuplicatePhoneErrors['telefono']), 'No se detectó el mismo teléfono con formato distinto.');
+$assert(isset($formattedDuplicatePhoneErrors['telefono']), 'No se rechazó el teléfono con espacios.');
 
 [, $duplicateEmailErrors] = $service->validate('clientes', [
     'nombre' => 'Otro cliente',
-    'telefono' => '+1 555-0101',
-    'correo' => 'duplicado@example.test',
+    'telefono' => '9511234011',
+    'correo' => 'duplicado@gmail.com',
     'direccion' => '',
 ]);
 $assert(isset($duplicateEmailErrors['correo']), 'No se rechazó un correo de cliente duplicado.');
+
+foreach ([
+    'cliente@hotmail.com',
+    'cliente@outlook.com',
+    'cliente@gmail',
+    'cliente@gmail.com.mx',
+    'correo-invalido',
+    'cliente@GMAIL.COM',
+] as $invalidEmail) {
+    [, $emailErrors] = $service->validate('clientes', [
+        'nombre' => 'Cliente con correo inválido',
+        'telefono' => '',
+        'correo' => $invalidEmail,
+        'direccion' => '',
+    ]);
+    $assert(isset($emailErrors['correo']), 'Se aceptó el correo inválido: ' . $invalidEmail);
+}
+
+foreach (['951123456', '95112345678', '95112AB567', '951 123 4567', ' 9511234567', '9511234567 ', '+529511234567'] as $invalidPhone) {
+    [, $phoneErrors] = $service->validate('clientes', [
+        'nombre' => 'Cliente con teléfono inválido',
+        'telefono' => $invalidPhone,
+        'correo' => 'valido@gmail.com',
+        'direccion' => '',
+    ]);
+    $assert(isset($phoneErrors['telefono']), 'Se aceptó el teléfono inválido: ' . $invalidPhone);
+}
+
+[, $invalidEmailWithValidPhoneErrors] = $service->validate('clientes', [
+    'nombre' => 'Cliente con contacto parcial inválido',
+    'telefono' => '9511234020',
+    'correo' => 'cliente@hotmail.com',
+    'direccion' => '',
+]);
+$assert(isset($invalidEmailWithValidPhoneErrors['correo']), 'Se aceptó correo inválido junto con teléfono válido.');
+
+[, $invalidPhoneWithValidEmailErrors] = $service->validate('clientes', [
+    'nombre' => 'Cliente con contacto parcial inválido',
+    'telefono' => '9511234021 ',
+    'correo' => 'valido@gmail.com',
+    'direccion' => '',
+]);
+$assert(isset($invalidPhoneWithValidEmailErrors['telefono']), 'Se aceptó teléfono inválido junto con correo válido.');
+
+[$validSupplierValues, $validSupplierErrors] = $service->validate('proveedores', [
+    'nombre' => 'Proveedor de prueba',
+    'contacto' => 'Contacto de prueba',
+    'telefono' => '9511234022',
+    'correo' => 'proveedor@gmail.com',
+]);
+$assert($validSupplierErrors === [], 'Se rechazaron datos válidos de proveedor.');
+$assert($validSupplierValues['telefono'] === '9511234022', 'No se conservó el teléfono válido del proveedor.');
+
+foreach (['proveedor@hotmail.com', 'proveedor@gmail', 'proveedor@gmail.com.mx', 'correo-invalido'] as $invalidEmail) {
+    [, $supplierEmailErrors] = $service->validate('proveedores', [
+        'nombre' => 'Proveedor con correo inválido',
+        'contacto' => 'Contacto de prueba',
+        'telefono' => '9511234024',
+        'correo' => $invalidEmail,
+    ]);
+    $assert(isset($supplierEmailErrors['correo']), 'Se aceptó el correo inválido del proveedor: ' . $invalidEmail);
+}
+
+foreach (['951123456', '95112345678', '95112AB567', '951 123 4567', '+529511234567'] as $invalidPhone) {
+    [, $supplierPhoneErrors] = $service->validate('proveedores', [
+        'nombre' => 'Proveedor con teléfono inválido',
+        'contacto' => 'Contacto de prueba',
+        'telefono' => $invalidPhone,
+        'correo' => 'valido@gmail.com',
+    ]);
+    $assert(isset($supplierPhoneErrors['telefono']), 'Se aceptó el teléfono inválido del proveedor: ' . $invalidPhone);
+}
+
+foreach ([
+    ['telefono' => '', 'correo' => 'proveedor@gmail.com', 'field' => 'telefono'],
+    ['telefono' => '9511234023', 'correo' => '', 'field' => 'correo'],
+    ['telefono' => '   ', 'correo' => 'proveedor@gmail.com', 'field' => 'telefono'],
+    ['telefono' => '9511234023', 'correo' => '   ', 'field' => 'correo'],
+    ['telefono' => '951 123 4023', 'correo' => 'proveedor@gmail.com', 'field' => 'telefono'],
+    ['telefono' => '9511234023', 'correo' => 'proveedor@outlook.com', 'field' => 'correo'],
+] as $supplierCase) {
+    [, $supplierErrors] = $service->validate('proveedores', [
+        'nombre' => 'Proveedor de prueba',
+        'contacto' => 'Contacto de prueba',
+        'telefono' => $supplierCase['telefono'],
+        'correo' => $supplierCase['correo'],
+    ]);
+    $assert(
+        isset($supplierErrors[$supplierCase['field']]),
+        'No se rechazó el dato inválido del proveedor: ' . $supplierCase['field']
+    );
+}
 
 [$paymentValues, $paymentErrors] = $service->validate('metodos_pago', [
     'nombre' => 'Efectivo',

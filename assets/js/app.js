@@ -8,11 +8,19 @@ document.querySelectorAll('[data-character-count]').forEach((field) => {
         return;
     }
 
+    const isContactPhone = field.id === 'telefono'
+        && field.closest('form[data-contact-validation]') !== null;
     const updateCounter = () => {
         counter.textContent = `${field.value.length} / ${maxLength} caracteres`;
     };
 
-    field.addEventListener('input', updateCounter);
+    field.addEventListener('input', () => {
+        if (isContactPhone) {
+            field.value = field.value.replace(/[^0-9]/g, '').slice(0, maxLength);
+        }
+
+        updateCounter();
+    });
     updateCounter();
 });
 
@@ -48,31 +56,61 @@ document.querySelectorAll('form[data-client-name-validation]').forEach((form) =>
     validateName();
 });
 
-document.querySelectorAll('form[data-client-contact-validation]').forEach((form) => {
+document.querySelectorAll('form[data-contact-validation]').forEach((form) => {
     const emailField = form.querySelector('#correo');
     const phoneField = form.querySelector('#telefono');
-    const feedback = document.getElementById('contact-method-error');
+    const emailFeedback = document.getElementById('correo-format-error');
+    const phoneFeedback = document.getElementById('telefono-format-error');
+    const missingFeedback = document.getElementById('contact-method-error');
+    const contactRequired = form.dataset.contactValidation === 'required';
 
-    if (!emailField || !phoneField || !feedback) {
+    if (!emailField || !phoneField || !emailFeedback || !phoneFeedback) {
         return;
     }
 
     const validateContact = (normalize = false, showMissing = false) => {
         if (normalize) {
             emailField.value = emailField.value.trim();
-            phoneField.value = phoneField.value.trim();
         }
 
-        const missingContact = emailField.value.trim() === '' && phoneField.value.trim() === '';
-        const message = missingContact
+        const email = emailField.value;
+        const phone = phoneField.value;
+        const phoneIsEmpty = phone.trim() === '';
+        const missingContact = email === '' && phoneIsEmpty;
+        let emailMessage = '';
+        let phoneMessage = '';
+
+        if (email === '' && contactRequired) {
+            emailMessage = 'El correo electrónico es obligatorio.';
+        } else if (email !== '') {
+            if (emailField.validity.typeMismatch) {
+                emailMessage = 'Ingresa un correo electrónico válido.';
+            } else if (!email.endsWith('@gmail.com')) {
+                emailMessage = 'El correo electrónico debe terminar en @gmail.com.';
+            }
+        }
+
+        if (phoneIsEmpty && contactRequired) {
+            phoneMessage = 'El teléfono es obligatorio.';
+        } else if (!phoneIsEmpty && !/^[0-9]{10}$/.test(phone)) {
+            phoneMessage = 'El teléfono debe contener exactamente 10 dígitos numéricos, sin espacios ni otros caracteres.';
+        }
+
+        const missingMessage = !contactRequired && missingContact
             ? 'Debes proporcionar un correo electrónico o un número telefónico como mínimo'
             : '';
+        emailField.setCustomValidity(emailMessage || missingMessage);
+        phoneField.setCustomValidity(phoneMessage || missingMessage);
+        emailFeedback.textContent = emailMessage;
+        phoneFeedback.textContent = phoneMessage;
+        emailFeedback.hidden = emailMessage === '';
+        phoneFeedback.hidden = phoneMessage === '';
+        if (missingFeedback) {
+            missingFeedback.textContent = missingMessage;
+            missingFeedback.hidden = missingMessage === '' || !showMissing;
+        }
 
-        const validityMessage = showMissing ? message : '';
-        emailField.setCustomValidity(validityMessage);
-        phoneField.setCustomValidity(validityMessage);
-        feedback.textContent = message;
-        feedback.hidden = !missingContact || !showMissing;
+        return emailMessage === '' && phoneMessage === '' && missingMessage === '';
     };
 
     emailField.addEventListener('input', () => validateContact(false, true));
@@ -80,10 +118,9 @@ document.querySelectorAll('form[data-client-contact-validation]').forEach((form)
     emailField.addEventListener('blur', () => validateContact(true, true));
     phoneField.addEventListener('blur', () => validateContact(true, true));
     form.addEventListener('submit', (event) => {
-        validateContact(true, true);
-        if (emailField.value === '' && phoneField.value === '') {
+        if (!validateContact(true, true)) {
             event.preventDefault();
-            emailField.reportValidity();
+            [emailField, phoneField].find((field) => !field.validity.valid)?.reportValidity();
         }
     });
     validateContact();

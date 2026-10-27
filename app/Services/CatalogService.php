@@ -31,8 +31,8 @@ class CatalogService
             'fields' => [
                 'nombre' => ['label' => 'Nombre', 'required' => true, 'max' => 150],
                 'contacto' => ['label' => 'Persona de contacto', 'required' => true, 'max' => 150],
-                'telefono' => ['label' => 'Teléfono', 'required' => false, 'max' => 30],
-                'correo' => ['label' => 'Correo electrónico', 'required' => false, 'max' => 150, 'type' => 'email'],
+                'telefono' => ['label' => 'Teléfono', 'required' => true, 'max' => 30],
+                'correo' => ['label' => 'Correo electrónico', 'required' => true, 'max' => 150, 'type' => 'email'],
             ],
         ],
         'clientes' => [
@@ -202,8 +202,11 @@ class CatalogService
                 $errors[$name] = 'El formato de ' . $field['label'] . ' no es válido.';
                 continue;
             }
-            $value = trim((string) $rawValue);
-            if ($module === 'clientes' && in_array($name, ['correo', 'telefono'], true) && $value !== '') {
+            $rawString = (string) $rawValue;
+            $value = $name === 'telefono' && trim($rawString) !== ''
+                ? $rawString
+                : trim($rawString);
+            if ($module === 'clientes' && in_array($name, ['correo', 'telefono'], true) && trim($value) !== '') {
                 $hasClientContact = true;
             }
 
@@ -217,6 +220,16 @@ class CatalogService
                 } else {
                     $values[$name] = null;
                 }
+                continue;
+            }
+
+            if ($name === 'telefono') {
+                if (!preg_match('/^[0-9]{10}$/D', $value)) {
+                    $errors[$name] = 'El teléfono debe contener exactamente 10 dígitos numéricos, sin espacios ni otros caracteres.';
+                    continue;
+                }
+
+                $values[$name] = $value;
                 continue;
             }
 
@@ -282,31 +295,13 @@ class CatalogService
                 continue;
             }
 
-            if (($field['type'] ?? '') === 'email' && filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
-                $errors[$name] = 'Ingresa un correo electrónico válido.';
-                continue;
-            }
-
-            if ($name === 'telefono') {
-                if ($module === 'clientes') {
-                    if (!preg_match('/^\+?[0-9(). -]{7,30}$/D', $value)) {
-                        $errors[$name] = 'Ingresa un teléfono válido (de 7 a 30 caracteres y con + solo al inicio).';
-                        continue;
-                    }
-
-                    $digits = preg_replace('/\D/', '', $value);
-                    $normalizedPhone = (str_starts_with($value, '+') ? '+' : '') . $digits;
-                    if (strlen($digits) < 7 || strlen($normalizedPhone) > 30) {
-                        $errors[$name] = 'El teléfono debe contener entre 7 y 30 dígitos y caber en el campo.';
-                        continue;
-                    }
-
-                    $values[$name] = $normalizedPhone;
+            if (($field['type'] ?? '') === 'email') {
+                if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
+                    $errors[$name] = 'Ingresa un correo electrónico válido.';
                     continue;
                 }
-
-                if (!preg_match('/^[0-9+(). -]{7,30}$/', $value)) {
-                    $errors[$name] = 'Ingresa un teléfono válido (de 7 a 30 caracteres).';
+                if (!str_ends_with($value, '@gmail.com')) {
+                    $errors[$name] = 'El correo electrónico debe terminar en @gmail.com.';
                     continue;
                 }
             }

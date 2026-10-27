@@ -27,7 +27,7 @@ try {
     $cases = [
         ['categorias', ['nombre' => 'Prueba categoria ' . $suffix, 'descripcion' => 'Dato ficticio de prueba']],
         ['marcas', ['nombre' => 'Prueba marca ' . $suffix, 'pais_origen' => 'Pais ficticio']],
-        ['proveedores', ['nombre' => 'Prueba proveedor ' . $suffix, 'contacto' => 'Contacto de prueba', 'telefono' => '+1 555-0100', 'correo' => 'prueba-' . $suffix . '@example.test']],
+        ['proveedores', ['nombre' => 'Prueba proveedor ' . $suffix, 'contacto' => 'Contacto de prueba', 'telefono' => (string) random_int(1000000000, 9999999999), 'correo' => 'prueba-' . $suffix . '@gmail.com']],
     ];
 
     foreach ($cases as [$module, $input]) {
@@ -60,7 +60,7 @@ try {
     [, $supplierErrors] = $service->validate('proveedores', [
         'nombre' => 'Proveedor ficticio',
         'contacto' => 'Contacto',
-        'telefono' => '',
+        'telefono' => '9511234567',
         'correo' => 'no-es-correo',
     ]);
     $assert(isset($supplierErrors['correo']), 'No se rechazó el correo inválido.');
@@ -69,7 +69,7 @@ try {
         'nombre' => 'Proveedor ficticio',
         'contacto' => 'Contacto',
         'telefono' => '12',
-        'correo' => '',
+        'correo' => 'valido@gmail.com',
     ]);
     $assert(isset($phoneErrors['telefono']), 'No se rechazó el teléfono con formato inválido.');
 

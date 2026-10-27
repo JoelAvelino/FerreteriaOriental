@@ -24,10 +24,11 @@ $assert = static function (bool $condition, string $message) use (&$tests): void
 $connection->beginTransaction();
 
 try {
+    $phone = static fn (): string => (string) random_int(1000000000, 9999999999);
     $input = [
         'nombre' => 'Cliente de prueba ' . $suffix,
-        'telefono' => '+1 555-0100',
-        'correo' => 'cliente-' . $suffix . '@example.test',
+        'telefono' => $phone(),
+        'correo' => 'cliente-' . $suffix . '@gmail.com',
         'direccion' => 'Dirección ficticia de prueba',
     ];
     [$values, $errors] = $service->validate('clientes', $input);
@@ -40,22 +41,22 @@ try {
         static fn (array $customer): bool => $customer['nombre'] === $input['nombre']
     ));
     $assert(count($savedCustomer) === 1, 'El cliente guardado no apareció en el listado.');
-    $assert($savedCustomer[0]['telefono'] === $values['telefono'], 'No se persistió el teléfono normalizado.');
+    $assert($savedCustomer[0]['telefono'] === $values['telefono'], 'No se persistió el teléfono.');
     $assert($savedCustomer[0]['correo'] === $input['correo'], 'No se persistió el correo.');
     $assert($savedCustomer[0]['direccion'] === $input['direccion'], 'No se persistió la dirección.');
 
     [, $formattedPhoneErrors] = $service->validate('clientes', [
         'nombre' => 'Cliente teléfono con formato distinto ' . $suffix,
-        'telefono' => '+1 (555) 0100',
-        'correo' => 'telefono-distinto-' . $suffix . '@example.test',
+        'telefono' => '951 123 4567',
+        'correo' => 'telefono-distinto-' . $suffix . '@gmail.com',
         'direccion' => '',
     ]);
-    $assert(isset($formattedPhoneErrors['telefono']), 'No se detectó el teléfono duplicado con puntuación distinta.');
+    $assert(isset($formattedPhoneErrors['telefono']), 'No se rechazó el teléfono con espacios.');
 
     [, $emailCaseErrors] = $service->validate('clientes', [
         'nombre' => 'Cliente correo con mayúsculas ' . $suffix,
-        'telefono' => '+1 555-0200',
-        'correo' => strtoupper($input['correo']),
+        'telefono' => $phone(),
+        'correo' => strtoupper(explode('@', $input['correo'])[0]) . '@gmail.com',
         'direccion' => '',
     ]);
     $assert(isset($emailCaseErrors['correo']), 'No se detectó el correo duplicado sin distinguir mayúsculas.');
@@ -70,7 +71,7 @@ try {
     try {
         $service->create('clientes', array_merge($values, [
             'nombre' => 'Cliente distinto ' . $suffix,
-            'telefono' => '+1 555-0200',
+            'telefono' => $phone(),
         ]));
     } catch (RuntimeException $exception) {
         $databaseEmailDuplicateRejected = $exception->getMessage() === 'El correo o teléfono ya está registrado.';
@@ -81,7 +82,7 @@ try {
     try {
         $service->create('clientes', array_merge($values, [
             'nombre' => 'Otro cliente ' . $suffix,
-            'correo' => 'otro-' . $suffix . '@example.test',
+            'correo' => 'otro-' . $suffix . '@gmail.com',
         ]));
     } catch (RuntimeException $exception) {
         $databasePhoneDuplicateRejected = $exception->getMessage() === 'El correo o teléfono ya está registrado.';
@@ -89,8 +90,8 @@ try {
     $assert($databasePhoneDuplicateRejected, 'La restricción única de teléfono no rechazó el dato duplicado.');
 
     $sameNameInput = array_merge($input, [
-        'telefono' => '+1 555-0201',
-        'correo' => 'mismo-nombre-' . $suffix . '@example.test',
+        'telefono' => $phone(),
+        'correo' => 'mismo-nombre-' . $suffix . '@gmail.com',
     ]);
     [$sameNameValues, $sameNameErrors] = $service->validate('clientes', $sameNameInput);
     $assert($sameNameErrors === [], 'Se rechazó un nombre repetido con correo y teléfono distintos.');
@@ -115,13 +116,13 @@ try {
     [$emailOnlyValues, $emailOnlyErrors] = $service->validate('clientes', [
         'nombre' => 'Cliente solo correo ' . $suffix,
         'telefono' => '   ',
-        'correo' => 'solo-correo-' . $suffix . '@example.test',
+        'correo' => 'solo-correo-' . $suffix . '@gmail.com',
         'direccion' => '',
     ]);
     $assert($emailOnlyErrors === [], 'Se rechazó un cliente con solo correo.');
     $assert(
         $emailOnlyValues['telefono'] === null
-            && $emailOnlyValues['correo'] === 'solo-correo-' . $suffix . '@example.test'
+            && $emailOnlyValues['correo'] === 'solo-correo-' . $suffix . '@gmail.com'
             && $emailOnlyValues['direccion'] === null,
         'El contacto opcional/email-only no quedó normalizado correctamente.'
     );

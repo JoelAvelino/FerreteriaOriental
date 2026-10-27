@@ -33,6 +33,18 @@ Las funcionalidades de datos y las historias HU01–HU07 están implementadas y 
 | T26 | Desarrollar registro de productos con los campos documentados y sus validaciones | HU07 | Terminado |
 
 ## Evidencia de avance y pruebas
+### Actualización de validaciones de contacto (2026-10-27)
+- Clientes: correo con formato válido y dominio exacto `@gmail.com`; teléfono de exactamente 10 dígitos ASCII. Se mantiene la opción de correo, teléfono o ambos, se rechazan contactos inválidos aunque el otro sea válido y permanecen las comprobaciones existentes de duplicidad para ambos datos.
+- Proveedores: correo y teléfono obligatorios; se aplican las mismas reglas de formato. Los campos vacíos o con solo espacios se rechazan.
+- Formularios: se añadieron restricciones complementarias y mensajes de formato; el servidor PHP mantiene la validación definitiva. No existen formularios de edición para Clientes o Proveedores.
+- `php database/test_customer_validation.php`: 83 comprobaciones OK.
+- `php database/test_customer_modules.php`: 15 comprobaciones OK, incluyendo persistencia y duplicados de Clientes.
+- `php database/test_catalog_modules.php`: 49 comprobaciones OK, incluyendo registro, campos obligatorios y formatos de Proveedores.
+- Regresión: `validate_db.php` confirmó las ocho tablas y siete claves foráneas; `test_payment_methods.php` (6), `test_sales.php` (24), `test_sales_history.php` (23) y `test_catalog_deletions.php` (8) finalizaron correctamente.
+- PHP lint pasó en los cinco archivos PHP modificados y `node --check assets/js/app.js` no reportó errores. No se alteró el esquema ni se ejecutó inicialización o modificación de datos persistentes.
+- Revisión previa: Clientes ya tenía validaciones de duplicidad por correo y teléfono. Proveedores tenía unicidad por nombre, pero no comprobaciones de duplicidad de correo/teléfono; no se añadió una nueva regla ni una restricción de base de datos en esta actualización.
+- Ajuste del contador de teléfono: los formularios de Clientes y Proveedores limitan la entrada a 10 caracteres, muestran el contador sobre ese máximo y filtran caracteres que no sean dígitos al escribir o pegar. Se mantiene la validación PHP de exactamente 10 dígitos.
+
 - HU03–HU05: registro y consulta de categorías, marcas y proveedores con validaciones y persistencia PDO implementados y probados.
 - HU07: registro de producto implementado con categoría, marca y proveedor existentes; se conservan sus identificadores y el esquema MySQL permanece sin cambios.
 - HU06: el formulario y el servidor validan las tres relaciones antes del guardado; las claves foráneas MySQL actúan como protección adicional.

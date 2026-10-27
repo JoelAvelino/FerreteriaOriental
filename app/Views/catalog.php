@@ -57,7 +57,7 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
             <?php if (!empty($errors['_form'])): ?>
                 <div class="alert error" role="alert"><?= $escape($errors['_form']) ?></div>
             <?php endif; ?>
-            <form method="post" action="<?= $escape($productFormAction) ?>"<?= in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name' : '' ?><?= $moduleKey === 'clientes' ? ' data-client-name-validation data-client-contact-validation' : '' ?>>
+            <form method="post" action="<?= $escape($productFormAction) ?>"<?= in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name' : '' ?><?= $moduleKey === 'clientes' ? ' data-client-name-validation' : '' ?><?= in_array($moduleKey, ['clientes', 'proveedores'], true) ? ' data-contact-validation="' . ($moduleKey === 'proveedores' ? 'required' : 'optional') . '"' : '' ?>>
                 <input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>">
                 <?php if ($moduleKey === 'productos'): ?>
                     <input type="hidden" name="_accion" value="<?= $productAction === 'editar' ? 'actualizar' : 'crear' ?>">
@@ -66,6 +66,7 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                     <?php endif; ?>
                 <?php endif; ?>
                 <?php foreach ($module['fields'] as $name => $field): ?>
+                    <?php $maxLength = in_array($moduleKey, ['clientes', 'proveedores'], true) && $name === 'telefono' ? 10 : ($field['max'] ?? null); ?>
                     <label for="<?= $escape($name) ?>"><?= $escape($field['label']) ?><?= $field['required'] ? ' *' : '' ?></label>
                     <?php if (($field['type'] ?? '') === 'select'): ?>
                         <select id="<?= $escape($name) ?>" name="<?= $escape($name) ?>"<?= $field['required'] ? ' required' : '' ?>>
@@ -78,11 +79,11 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                             <p class="field-error">No hay opciones disponibles; registra primero un elemento de este tipo.</p>
                         <?php endif; ?>
                     <?php elseif (($field['type'] ?? '') === 'textarea'): ?>
-                        <textarea id="<?= $escape($name) ?>" name="<?= $escape($name) ?>"<?= isset($field['max']) ? ' maxlength="' . $escape($field['max']) . '" data-character-count' : '' ?><?= $field['required'] ? ' required' : '' ?>><?= $escape($values[$name] ?? '') ?></textarea>
+                        <textarea id="<?= $escape($name) ?>" name="<?= $escape($name) ?>"<?= $maxLength !== null ? ' maxlength="' . $escape($maxLength) . '" data-character-count' : '' ?><?= $field['required'] ? ' required' : '' ?>><?= $escape($values[$name] ?? '') ?></textarea>
                     <?php else: ?>
-                        <input id="<?= $escape($name) ?>" name="<?= $escape($name) ?>" type="<?= ($field['type'] ?? '') === 'email' ? 'email' : (($name === 'telefono') ? 'tel' : (($field['type'] ?? '') === 'integer' || ($field['type'] ?? '') === 'decimal' ? 'number' : 'text')) ?>" value="<?= $escape($values[$name] ?? '') ?>"<?= ($field['type'] ?? '') === 'integer' ? ' step="1"' : '' ?><?= ($field['type'] ?? '') === 'decimal' ? ' step="0.01"' : '' ?><?= isset($field['max']) ? ' maxlength="' . $escape($field['max']) . '"' : '' ?><?= $name === 'telefono' ? ' pattern="' . ($moduleKey === 'clientes' ? '(?:\+(?:[0-9]|\(|\)|\.| |-){6,29}|(?:[0-9]|\(|\)|\.| |-){7,30})' : '(?:[0-9]|\+|\(|\)|\.| |-){7,30}') . '" title="Usa entre 7 y 30 caracteres: números, espacios o + ( ) . -"' : '' ?><?= $moduleKey === 'clientes' && $name === 'nombre' ? ' pattern="[\p{L}]+(?:\s+[\p{L}]+)*" title="Usa solo letras y espacios entre palabras" aria-describedby="nombre-format-error"' : '' ?><?= $moduleKey === 'clientes' && in_array($name, ['correo', 'telefono'], true) ? ' aria-describedby="contact-method-error"' : '' ?><?= $field['required'] ? ' required' : '' ?><?= isset($field['max']) ? ' data-character-count' : '' ?><?= $name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name-field aria-describedby="nombre-duplicate-error"' : '' ?>>
+                        <input id="<?= $escape($name) ?>" name="<?= $escape($name) ?>" type="<?= ($field['type'] ?? '') === 'email' ? 'email' : (($name === 'telefono') ? 'tel' : (($field['type'] ?? '') === 'integer' || ($field['type'] ?? '') === 'decimal' ? 'number' : 'text')) ?>" value="<?= $escape($values[$name] ?? '') ?>"<?= ($field['type'] ?? '') === 'integer' ? ' step="1"' : '' ?><?= ($field['type'] ?? '') === 'decimal' ? ' step="0.01"' : '' ?><?= $maxLength !== null ? ' maxlength="' . $escape($maxLength) . '"' : '' ?><?= in_array($moduleKey, ['clientes', 'proveedores'], true) && $name === 'telefono' ? ' pattern="[0-9]{10}" title="Ingresa exactamente 10 dígitos numéricos, sin espacios ni otros caracteres"' : '' ?><?= in_array($moduleKey, ['clientes', 'proveedores'], true) && $name === 'correo' ? ' pattern="[^@\\s]+@gmail\\.com" title="Ingresa un correo válido que termine en @gmail.com"' : '' ?><?= $moduleKey === 'clientes' && $name === 'nombre' ? ' pattern="[\p{L}]+(?:\s+[\p{L}]+)*" title="Usa solo letras y espacios entre palabras" aria-describedby="nombre-format-error"' : '' ?><?= in_array($moduleKey, ['clientes', 'proveedores'], true) && in_array($name, ['correo', 'telefono'], true) ? ' aria-describedby="' . $escape($name) . '-format-error"' . ($moduleKey === 'clientes' ? ' contact-method-error' : '') : '' ?><?= $field['required'] ? ' required' : '' ?><?= $maxLength !== null ? ' data-character-count' : '' ?><?= $name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name-field aria-describedby="nombre-duplicate-error"' : '' ?>>
                     <?php endif; ?>
-                    <?php if (isset($field['max'])): ?>
+                    <?php if ($maxLength !== null): ?>
                         <p class="character-counter" id="<?= $escape($name) ?>-counter" aria-live="polite"></p>
                     <?php endif; ?>
                     <?php if ($name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true)): ?>
@@ -90,6 +91,9 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                     <?php endif; ?>
                     <?php if ($moduleKey === 'clientes' && $name === 'nombre'): ?>
                         <p class="field-error" id="nombre-format-error" role="alert" aria-live="polite" hidden></p>
+                    <?php endif; ?>
+                    <?php if (in_array($moduleKey, ['clientes', 'proveedores'], true) && in_array($name, ['correo', 'telefono'], true)): ?>
+                        <p class="field-error" id="<?= $escape($name) ?>-format-error" role="alert" aria-live="polite" hidden></p>
                     <?php endif; ?>
                     <?php if (isset($errors[$name])): ?>
                         <p class="field-error" role="alert"><?= $escape($errors[$name]) ?></p>
