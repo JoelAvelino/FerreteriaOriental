@@ -45,7 +45,13 @@ document.querySelectorAll('form[data-unique-name]').forEach((form) => {
 });
 
 document.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', (event) => {
+        const confirmation = form.dataset.confirmDelete;
+        if (confirmation && !window.confirm(confirmation)) {
+            event.preventDefault();
+            return;
+        }
+
         const button = form.querySelector('[data-submit-button]');
 
         if (!button) {

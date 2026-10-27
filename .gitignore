@@ -1,0 +1,19 @@
+
+# Archivos temporales y registros
+*.log
+*.tmp
+*.temp
+
+# Configuración local y credenciales
+.env
+.env.*
+!.env.example
+
+# Archivos del sistema operativo
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Copias de seguridad
+*.bak
+*.old

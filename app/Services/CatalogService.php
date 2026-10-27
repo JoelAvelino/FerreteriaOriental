@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\CatalogRepository;
+use PDOException;
+use RuntimeException;
 
 class CatalogService
 {
@@ -32,6 +34,32 @@ class CatalogService
                 'telefono' => ['label' => 'Teléfono', 'required' => false, 'max' => 30],
                 'correo' => ['label' => 'Correo electrónico', 'required' => false, 'max' => 150, 'type' => 'email'],
             ],
+        ],
+        'clientes' => [
+            'title' => 'Clientes',
+            'table' => 'cliente',
+            'success_message' => 'Cliente registrado correctamente.',
+            'fields' => [
+                'nombre' => ['label' => 'Nombre', 'required' => true, 'max' => 150],
+                'telefono' => ['label' => 'Teléfono', 'required' => false, 'max' => 30],
+                'correo' => ['label' => 'Correo electrónico', 'required' => false, 'max' => 150, 'type' => 'email'],
+                'direccion' => ['label' => 'Dirección', 'required' => false, 'type' => 'textarea'],
+            ],
+        ],
+        'metodos_pago' => [
+            'title' => 'Métodos de pago',
+            'table' => 'metodo_pago',
+            'success_message' => 'Método de pago registrado correctamente.',
+            'fields' => [
+                'nombre' => ['label' => 'Nombre', 'required' => true, 'max' => 150],
+                'descripcion' => ['label' => 'Descripción', 'required' => false, 'type' => 'textarea'],
+            ],
+        ],
+        'ventas' => [
+            'title' => 'Ventas',
+            'table' => 'venta',
+            'fields' => [],
+            'show_listing' => false,
         ],
         'productos' => [
             'title' => 'Productos',
@@ -241,12 +269,44 @@ class CatalogService
                 continue;
             }
 
-            if ($name === 'telefono' && !preg_match('/^[0-9+(). -]{7,30}$/', $value)) {
-                $errors[$name] = 'Ingresa un teléfono válido (de 7 a 30 caracteres).';
-                continue;
+            if ($name === 'telefono') {
+                if ($module === 'clientes') {
+                    if (!preg_match('/^\+?[0-9(). -]{7,30}$/D', $value)) {
+                        $errors[$name] = 'Ingresa un teléfono válido (de 7 a 30 caracteres y con + solo al inicio).';
+                        continue;
+                    }
+
+                    $digits = preg_replace('/\D/', '', $value);
+                    $normalizedPhone = (str_starts_with($value, '+') ? '+' : '') . $digits;
+                    if (strlen($digits) < 7 || strlen($normalizedPhone) > 30) {
+                        $errors[$name] = 'El teléfono debe contener entre 7 y 30 dígitos y caber en el campo.';
+                        continue;
+                    }
+
+                    $values[$name] = $normalizedPhone;
+                    continue;
+                }
+
+                if (!preg_match('/^[0-9+(). -]{7,30}$/', $value)) {
+                    $errors[$name] = 'Ingresa un teléfono válido (de 7 a 30 caracteres).';
+                    continue;
+                }
             }
 
             $values[$name] = $value;
+        }
+
+        if ($module === 'clientes') {
+            if (!isset($errors['telefono']) && $values['telefono'] !== null && $this->repository->clientPhoneExists($values['telefono'])) {
+                $errors['telefono'] = 'Este teléfono ya está registrado.';
+            }
+            if (!isset($errors['correo']) && $values['correo'] !== null && $this->repository->clientEmailExists($values['correo'])) {
+                $errors['correo'] = 'Este correo electrónico ya está registrado.';
+            }
+        }
+
+        if ($module === 'metodos_pago' && !isset($errors['nombre']) && $this->repository->paymentMethodNameExists($values['nombre'])) {
+            $errors['nombre'] = 'Ya existe un método de pago con ese nombre.';
         }
 
         return [$values, $errors];
@@ -264,6 +324,34 @@ class CatalogService
         $values['stock'] = $values['stock'] ?? 0;
 
         return $this->repository->updateProduct($id, $values);
+    }
+
+    public function delete(string $module, int $id): bool
+    {
+        $tables = [
+            'categorias' => 'categoria',
+            'proveedores' => 'proveedor',
+            'productos' => 'producto',
+        ];
+        if (!isset($tables[$module]) || $id < 1) {
+            throw new RuntimeException('El registro solicitado no se puede eliminar.');
+        }
+
+        try {
+            return $this->repository->delete($tables[$module], $id);
+        } catch (PDOException $exception) {
+            $errorInfo = $exception->errorInfo;
+            if ($exception->getCode() === '23000' && isset($errorInfo[1]) && (int) $errorInfo[1] === 1451) {
+                $messages = [
+                    'categorias' => 'No se puede eliminar la categoría porque tiene productos asociados.',
+                    'proveedores' => 'No se puede eliminar el proveedor porque tiene productos asociados.',
+                    'productos' => 'No se puede eliminar el producto porque tiene ventas asociadas.',
+                ];
+                throw new RuntimeException($messages[$module], 0, $exception);
+            }
+
+            throw $exception;
+        }
     }
 
     private function requireModule(string $module): array

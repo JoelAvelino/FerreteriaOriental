@@ -8,6 +8,12 @@ use RuntimeException;
 
 class CatalogRepository
 {
+    private const DELETABLE_TABLES = [
+        'categoria',
+        'proveedor',
+        'producto',
+    ];
+
     private const REFERENCE_TABLES = [
         'id_categoria' => 'categoria',
         'id_marca' => 'marca',
@@ -59,6 +65,36 @@ class CatalogRepository
             "SELECT 1 FROM `{$table}` WHERE `id` = :id"
         );
         $statement->execute([':id' => $id]);
+
+        return $statement->fetchColumn() !== false;
+    }
+
+    public function clientPhoneExists(string $phone): bool
+    {
+        $statement = $this->connection->prepare(
+            'SELECT 1 FROM `cliente` WHERE `telefono` = :telefono LIMIT 1'
+        );
+        $statement->execute([':telefono' => $phone]);
+
+        return $statement->fetchColumn() !== false;
+    }
+
+    public function clientEmailExists(string $email): bool
+    {
+        $statement = $this->connection->prepare(
+            'SELECT 1 FROM `cliente` WHERE `correo` = :correo LIMIT 1'
+        );
+        $statement->execute([':correo' => $email]);
+
+        return $statement->fetchColumn() !== false;
+    }
+
+    public function paymentMethodNameExists(string $name): bool
+    {
+        $statement = $this->connection->prepare(
+            'SELECT 1 FROM `metodo_pago` WHERE `nombre` = :nombre LIMIT 1'
+        );
+        $statement->execute([':nombre' => $name]);
 
         return $statement->fetchColumn() !== false;
     }
@@ -130,6 +166,20 @@ class CatalogRepository
         return $this->findProduct($id) !== null;
     }
 
+    public function delete(string $table, int $id): bool
+    {
+        if (!in_array($table, self::DELETABLE_TABLES, true)) {
+            throw new \InvalidArgumentException('El tipo de registro solicitado no se puede eliminar.');
+        }
+
+        $statement = $this->connection->prepare(
+            "DELETE FROM `{$table}` WHERE `id` = :id"
+        );
+        $statement->execute([':id' => $id]);
+
+        return $statement->rowCount() === 1;
+    }
+
     public function create(string $table, array $values): void
     {
         $columns = array_keys($values);
@@ -150,6 +200,10 @@ class CatalogRepository
         } catch (PDOException $exception) {
             $errorInfo = $exception->errorInfo;
             if ($exception->getCode() === '23000' && isset($errorInfo[1]) && (int) $errorInfo[1] === 1062) {
+                if ($table === 'cliente') {
+                    throw new RuntimeException('El correo o teléfono ya está registrado.', 0, $exception);
+                }
+
                 throw new RuntimeException('Ya existe un registro con ese nombre.', 0, $exception);
             }
             if ($exception->getCode() === '23000' && isset($errorInfo[1]) && (int) $errorInfo[1] === 1452) {

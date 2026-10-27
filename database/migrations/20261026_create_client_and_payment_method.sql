@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `cliente` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `nombre` VARCHAR(150) NOT NULL,
+    `telefono` VARCHAR(30) NULL,
+    `correo` VARCHAR(150) NULL,
+    `direccion` TEXT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_cliente_nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `metodo_pago` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `nombre` VARCHAR(150) NOT NULL,
+    `descripcion` TEXT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_metodo_pago_nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

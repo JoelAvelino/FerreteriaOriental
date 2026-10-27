@@ -14,6 +14,8 @@
 
 $escape = static fn ($value): string => htmlspecialchars(is_scalar($value) ? (string) $value : '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $moduleKey = (string) ($_GET['modulo'] ?? 'categorias');
+$uniqueNameModules = ['categorias', 'marcas', 'proveedores', 'metodos_pago'];
+$deletableModules = ['categorias', 'proveedores', 'productos'];
 $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
     ? '?modulo=productos&accion=editar&id=' . $escape($editingProductId)
     : '?modulo=' . $escape($moduleKey);
@@ -30,7 +32,7 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
 <body>
 <header>
     <h1>Ferretería Oriental</h1>
-    <p>Administración de categorías, marcas, proveedores y productos</p>
+    <p>Administración de categorías, marcas, proveedores, clientes, métodos de pago y productos</p>
 </header>
 <main>
     <nav aria-label="Módulos">
@@ -55,7 +57,7 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
             <?php if (!empty($errors['_form'])): ?>
                 <div class="alert error" role="alert"><?= $escape($errors['_form']) ?></div>
             <?php endif; ?>
-            <form method="post" action="<?= $escape($productFormAction) ?>"<?= in_array($moduleKey, ['categorias', 'marcas', 'proveedores'], true) ? ' data-unique-name' : '' ?>>
+            <form method="post" action="<?= $escape($productFormAction) ?>"<?= in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name' : '' ?>>
                 <input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>">
                 <?php if ($moduleKey === 'productos'): ?>
                     <input type="hidden" name="_accion" value="<?= $productAction === 'editar' ? 'actualizar' : 'crear' ?>">
@@ -78,12 +80,12 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                     <?php elseif (($field['type'] ?? '') === 'textarea'): ?>
                         <textarea id="<?= $escape($name) ?>" name="<?= $escape($name) ?>"<?= isset($field['max']) ? ' maxlength="' . $escape($field['max']) . '" data-character-count' : '' ?><?= $field['required'] ? ' required' : '' ?>><?= $escape($values[$name] ?? '') ?></textarea>
                     <?php else: ?>
-                        <input id="<?= $escape($name) ?>" name="<?= $escape($name) ?>" type="<?= ($field['type'] ?? '') === 'email' ? 'email' : (($name === 'telefono') ? 'tel' : (($field['type'] ?? '') === 'integer' || ($field['type'] ?? '') === 'decimal' ? 'number' : 'text')) ?>" value="<?= $escape($values[$name] ?? '') ?>"<?= ($field['type'] ?? '') === 'integer' ? ' step="1"' : '' ?><?= ($field['type'] ?? '') === 'decimal' ? ' step="0.01"' : '' ?><?= isset($field['max']) ? ' maxlength="' . $escape($field['max']) . '"' : '' ?><?= $name === 'telefono' ? ' pattern="[0-9+(). -]{7,30}" title="Usa entre 7 y 30 caracteres: números, espacios o + ( ) . -"' : '' ?><?= $field['required'] ? ' required' : '' ?><?= isset($field['max']) ? ' data-character-count' : '' ?><?= $name === 'nombre' && in_array($moduleKey, ['categorias', 'marcas', 'proveedores'], true) ? ' data-unique-name-field aria-describedby="nombre-duplicate-error"' : '' ?>>
+                        <input id="<?= $escape($name) ?>" name="<?= $escape($name) ?>" type="<?= ($field['type'] ?? '') === 'email' ? 'email' : (($name === 'telefono') ? 'tel' : (($field['type'] ?? '') === 'integer' || ($field['type'] ?? '') === 'decimal' ? 'number' : 'text')) ?>" value="<?= $escape($values[$name] ?? '') ?>"<?= ($field['type'] ?? '') === 'integer' ? ' step="1"' : '' ?><?= ($field['type'] ?? '') === 'decimal' ? ' step="0.01"' : '' ?><?= isset($field['max']) ? ' maxlength="' . $escape($field['max']) . '"' : '' ?><?= $name === 'telefono' ? ' pattern="' . ($moduleKey === 'clientes' ? '\+?[0-9(). -]{7,30}' : '[0-9+(). -]{7,30}') . '" title="Usa entre 7 y 30 caracteres: números, espacios o + ( ) . -"' : '' ?><?= $field['required'] ? ' required' : '' ?><?= isset($field['max']) ? ' data-character-count' : '' ?><?= $name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true) ? ' data-unique-name-field aria-describedby="nombre-duplicate-error"' : '' ?>>
                     <?php endif; ?>
                     <?php if (isset($field['max'])): ?>
                         <p class="character-counter" id="<?= $escape($name) ?>-counter" aria-live="polite"></p>
                     <?php endif; ?>
-                    <?php if ($name === 'nombre' && in_array($moduleKey, ['categorias', 'marcas', 'proveedores'], true)): ?>
+                    <?php if ($name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true)): ?>
                         <p class="field-error" id="nombre-duplicate-error" role="alert" hidden></p>
                     <?php endif; ?>
                     <?php if (isset($errors[$name])): ?>
@@ -111,6 +113,9 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                             <?php foreach ($module['fields'] as $field): ?>
                                 <th><?= $escape($field['label']) ?></th>
                             <?php endforeach; ?>
+                            <?php if (in_array($moduleKey, $deletableModules, true)): ?>
+                                <th>Acciones</th>
+                            <?php endif; ?>
                         </tr>
                         </thead>
                         <tbody>
@@ -118,8 +123,18 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                             <tr>
                                 <td><?= $escape($record['id']) ?></td>
                                 <?php foreach ($module['fields'] as $name => $field): ?>
-                                    <td<?= $name === 'nombre' && in_array($moduleKey, ['categorias', 'marcas', 'proveedores'], true) ? ' data-existing-name="' . $escape($record[$name]) . '"' : '' ?>><?= nl2br($escape($record[$name])) ?></td>
+                                    <td<?= $name === 'nombre' && in_array($moduleKey, $uniqueNameModules, true) ? ' data-existing-name="' . $escape($record[$name]) . '"' : '' ?>><?= nl2br($escape($record[$name])) ?></td>
                                 <?php endforeach; ?>
+                                <?php if (in_array($moduleKey, $deletableModules, true)): ?>
+                                    <td>
+                                        <form method="post" action="?modulo=<?= $escape($moduleKey) ?>" data-confirm-delete="¿Eliminar <?= $escape($record['nombre']) ?>?">
+                                            <input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>">
+                                            <input type="hidden" name="_accion" value="eliminar">
+                                            <input type="hidden" name="_id" value="<?= $escape($record['id']) ?>">
+                                            <button type="submit" class="danger-button" data-submit-button>Eliminar</button>
+                                        </form>
+                                    </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
@@ -195,7 +210,15 @@ $productFormAction = $moduleKey === 'productos' && $productAction === 'editar'
                                 <td><?= $escape($product['categoria']) ?></td>
                                 <td><?= $escape($product['marca']) ?></td>
                                 <td><?= $escape($product['proveedor']) ?></td>
-                                <td><a href="?modulo=productos&amp;accion=editar&amp;id=<?= $escape($product['id']) ?>#form-title">Editar</a></td>
+                                <td class="product-actions">
+                                    <a href="?modulo=productos&amp;accion=editar&amp;id=<?= $escape($product['id']) ?>#form-title">Editar</a>
+                                    <form method="post" action="?modulo=productos#catalogo" data-confirm-delete="¿Eliminar <?= $escape($product['nombre']) ?>?">
+                                        <input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>">
+                                        <input type="hidden" name="_accion" value="eliminar">
+                                        <input type="hidden" name="_id" value="<?= $escape($product['id']) ?>">
+                                        <button type="submit" class="danger-button" data-submit-button>Eliminar</button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>

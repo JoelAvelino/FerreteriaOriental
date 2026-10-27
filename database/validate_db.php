@@ -18,8 +18,8 @@ try {
 
     $constraintCount = count($report['constraints']);
     echo "Claves foráneas detectadas: {$constraintCount}\n";
-    if ($constraintCount < 3) {
-        echo "No se detectaron todas las relaciones esperadas.\n";
+    if ($constraintCount < 7) {
+        echo "No se detectaron las siete relaciones esperadas de Sprint 1 y Sprint 2.\n";
         exit(1);
     }
 

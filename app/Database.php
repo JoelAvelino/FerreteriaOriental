@@ -89,6 +89,10 @@ class Database
             'marca',
             'proveedor',
             'producto',
+            'cliente',
+            'metodo_pago',
+            'venta',
+            'detalle_venta',
         ];
 
         $missing = [];

@@ -205,6 +205,52 @@ th {
     color: #173b57;
 }
 
+.sale-form-section {
+    display: grid;
+    gap: 1rem;
+}
+
+.sale-header-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.sale-lines-table select,
+.sale-lines-table input {
+    min-width: 9rem;
+}
+
+.sale-lines-table button,
+.secondary-button {
+    margin-top: 0;
+    background: #52616d;
+    white-space: nowrap;
+}
+
+.danger-button {
+    margin-top: 0;
+    background: #8b1e1e;
+}
+
+.product-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+}
+
+.product-actions form {
+    margin: 0;
+}
+
+.sale-summary {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
 @media (max-width: 760px) {
     .columns {
         grid-template-columns: 1fr;

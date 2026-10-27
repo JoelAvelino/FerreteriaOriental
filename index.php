@@ -2,11 +2,16 @@
 
 use App\Database;
 use App\Repositories\CatalogRepository;
+use App\Repositories\SalesRepository;
 use App\Services\CatalogService;
+use App\Services\SalesException;
+use App\Services\SalesService;
 
 require __DIR__ . '/app/Database.php';
 require __DIR__ . '/app/Repositories/CatalogRepository.php';
 require __DIR__ . '/app/Services/CatalogService.php';
+require __DIR__ . '/app/Repositories/SalesRepository.php';
+require __DIR__ . '/app/Services/SalesService.php';
 
 session_start();
 
@@ -43,6 +48,50 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+if ($moduleKey === 'ventas') {
+    $salesService = new SalesService(new SalesRepository($connection));
+    $salesModule = $service->getModule('ventas');
+    $errors = [];
+    $values = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : [];
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $submittedToken = $_POST['csrf_token'] ?? '';
+        if (!is_string($submittedToken) || !hash_equals($_SESSION['csrf_token'], $submittedToken)) {
+            $errors['_form'] = 'La sesión del formulario venció. Recarga la página e inténtalo de nuevo.';
+        } else {
+            try {
+                [$validatedValues, $errors] = $salesService->validate($_POST);
+                if (!$errors) {
+                    $folio = $salesService->register($validatedValues);
+                    $_SESSION['flash_message'] = 'Venta registrada correctamente. Folio: ' . $folio . '.';
+                    $_SESSION['flash_type'] = 'success';
+                    header('Location: ?modulo=ventas', true, 303);
+                    exit;
+                }
+            } catch (SalesException $exception) {
+                $errors['_form'] = $exception->getMessage();
+            } catch (Throwable $exception) {
+                error_log('Error al registrar venta: ' . $exception->getMessage());
+                $errors['_form'] = 'No se pudo registrar la venta. No se guardaron cambios; inténtalo nuevamente.';
+            }
+        }
+    }
+
+    try {
+        $options = $salesService->formOptions();
+    } catch (Throwable $exception) {
+        error_log('Error al cargar opciones de venta: ' . $exception->getMessage());
+        $options = ['clientes' => [], 'metodos_pago' => [], 'productos' => []];
+        $errors['_form'] = 'No se pudieron cargar los datos de la venta. Verifica la conexión e inténtalo nuevamente.';
+    }
+
+    $modules = $service->modules();
+    $module = $salesModule;
+    $csrfToken = $_SESSION['csrf_token'];
+    require __DIR__ . '/app/Views/sales.php';
+    exit;
 }
 
 $errors = [];
@@ -93,6 +142,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && http_response_code() !== 404) {
     $submittedToken = $_POST['csrf_token'] ?? '';
     if (!is_string($submittedToken) || !hash_equals($_SESSION['csrf_token'], $submittedToken)) {
         $errors['_form'] = 'La sesión del formulario venció. Recarga la página e inténtalo de nuevo.';
+    } elseif ($operation === 'eliminar') {
+        $rawId = $_POST['_id'] ?? null;
+        $recordId = is_string($rawId) ? filter_var($rawId, FILTER_VALIDATE_INT) : false;
+        if ($recordId === false || $recordId < 1) {
+            $errors['_form'] = 'No se identificó un registro válido para eliminar.';
+        } else {
+            try {
+                if (!$service->delete($moduleKey, (int) $recordId)) {
+                    $errors['_form'] = 'El registro ya no existe o ya fue eliminado.';
+                } else {
+                    $_SESSION['flash_message'] = 'Registro eliminado correctamente.';
+                    $_SESSION['flash_type'] = 'success';
+                    header('Location: ?modulo=' . rawurlencode($moduleKey) . ($moduleKey === 'productos' ? '#catalogo' : ''), true, 303);
+                    exit;
+                }
+            } catch (\PDOException $exception) {
+                error_log('Error al eliminar registro de ' . $moduleKey . ': ' . $exception->getMessage());
+                $errors['_form'] = 'No se pudo eliminar el registro. Verifica sus relaciones e inténtalo nuevamente.';
+            } catch (RuntimeException $exception) {
+                $errors['_form'] = $exception->getMessage();
+            } catch (Throwable $exception) {
+                error_log('Error al eliminar registro de ' . $moduleKey . ': ' . $exception->getMessage());
+                $errors['_form'] = 'No se pudo eliminar el registro. Inténtalo nuevamente.';
+            }
+        }
     } elseif ($productFormError !== null) {
         $errors['_form'] = $productFormError;
     } else {
