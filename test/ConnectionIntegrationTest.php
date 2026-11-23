@@ -43,8 +43,12 @@ class ConnectionIntegrationTest extends TestCase
      */
     protected function crearConexionDb(): PDO
     {
-        if (class_exists('\\App\\Core\\Database')) {
-            $conexion = \App\Core\Database::getInstance()->getConnection();
+        $claseDatabase = '\\App\\Core\\Database';
+
+        if (class_exists($claseDatabase)) {
+            /** @var object $instancia */
+            $instancia = $claseDatabase::getInstance();
+            $conexion = $instancia->getConnection();
         } else {
             // Respaldo en memoria para pruebas aisladas sin depender de MySQL activo
             $conexion = new PDO('sqlite::memory:', null, null, [
