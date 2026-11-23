@@ -67,6 +67,24 @@ class CatalogService
             'fields' => [],
             'show_listing' => false,
         ],
+        'precios' => [
+            'title' => 'Precios',
+            'table' => 'producto',
+            'fields' => [],
+            'show_listing' => false,
+        ],
+        'historial_precios' => [
+            'title' => 'Historial de precios',
+            'table' => 'historial_precio',
+            'fields' => [],
+            'show_listing' => false,
+        ],
+        'ubicaciones' => [
+            'title' => 'Ubicaciones',
+            'table' => 'producto',
+            'fields' => [],
+            'show_listing' => false,
+        ],
         'productos' => [
             'title' => 'Productos',
             'form_title' => 'Registrar producto',
@@ -172,11 +190,56 @@ class CatalogService
         return [$filters, $errors];
     }
 
+    public function validateLocationFilters(array $input): array
+    {
+        $filters = [
+            'busqueda' => '',
+            'id_producto' => null,
+            'pasillo' => '',
+        ];
+        $errors = [];
+
+        foreach (['busqueda' => 150, 'pasillo' => 50] as $field => $maxLength) {
+            $rawValue = $input[$field] ?? '';
+            if (!is_string($rawValue)) {
+                $errors[$field] = 'El filtro no tiene un formato válido.';
+                continue;
+            }
+
+            $value = trim($rawValue);
+            if ($this->length($value) > $maxLength) {
+                $errors[$field] = 'El filtro no puede exceder ' . $maxLength . ' caracteres.';
+                continue;
+            }
+            $filters[$field] = $value;
+        }
+
+        if ($filters['busqueda'] !== '' && preg_match('/^\d+$/D', $filters['busqueda'])) {
+            $normalizedId = ltrim($filters['busqueda'], '0');
+            $normalizedId = $normalizedId === '' ? '0' : $normalizedId;
+            if (strlen($normalizedId) <= 10) {
+                $id = filter_var($normalizedId, FILTER_VALIDATE_INT);
+                if ($id !== false && $id > 0 && $id <= 4294967295) {
+                    $filters['id_producto'] = $id;
+                }
+            }
+        }
+
+        return [$filters, $errors];
+    }
+
     public function searchProducts(array $filters): array
     {
         $this->requireModule('productos');
 
         return $this->repository->searchProducts($filters);
+    }
+
+    public function searchProductsForLocations(array $filters): array
+    {
+        $this->requireModule('ubicaciones');
+
+        return $this->repository->searchProductsForLocations($filters);
     }
 
     public function findProduct(int $id): ?array

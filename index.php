@@ -2,14 +2,22 @@
 
 use App\Database;
 use App\Repositories\CatalogRepository;
+use App\Repositories\PriceHistoryRepository;
 use App\Repositories\SalesRepository;
 use App\Services\CatalogService;
+use App\Services\PriceHistoryService;
+use App\Services\PriceProductNotFoundException;
+use App\Services\PriceService;
+use App\Services\PriceValidationException;
 use App\Services\SalesException;
 use App\Services\SalesService;
 
 require __DIR__ . '/app/Database.php';
 require __DIR__ . '/app/Repositories/CatalogRepository.php';
+require __DIR__ . '/app/Repositories/PriceHistoryRepository.php';
 require __DIR__ . '/app/Services/CatalogService.php';
+require __DIR__ . '/app/Services/PriceHistoryService.php';
+require __DIR__ . '/app/Services/PriceService.php';
 require __DIR__ . '/app/Repositories/SalesRepository.php';
 require __DIR__ . '/app/Services/SalesService.php';
 
@@ -28,7 +36,9 @@ try {
     exit;
 }
 
-$service = new CatalogService(new CatalogRepository($connection));
+$catalogRepository = new CatalogRepository($connection);
+$service = new CatalogService($catalogRepository);
+$priceService = new PriceService($catalogRepository);
 
 $requestedModule = $_GET['modulo'] ?? 'categorias';
 $moduleKey = is_string($requestedModule) ? $requestedModule : '';
@@ -36,14 +46,15 @@ $module = $service->getModule($moduleKey);
 
 if ($module === null) {
     http_response_code(404);
-    $moduleKey = 'categorias';
-    $module = $service->getModule($moduleKey);
-    $message = 'El módulo solicitado no existe.';
-    $messageType = 'error';
-} else {
-    $message = $_SESSION['flash_message'] ?? null;
-    $messageType = $_SESSION['flash_type'] ?? 'success';
+    unset($_SESSION['flash_message'], $_SESSION['flash_type']);
+    echo '<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">';
+    echo '<title>Módulo no encontrado | Ferretería Oriental</title><link rel="stylesheet" href="assets/css/styles.css">';
+    echo '<body><main><h1>Módulo no encontrado</h1><p>El módulo solicitado no existe.</p>';
+    echo '<p><a href="?modulo=categorias">Volver a Categorías</a></p></main></body></html>';
+    exit;
 }
+$message = $_SESSION['flash_message'] ?? null;
+$messageType = $_SESSION['flash_type'] ?? 'success';
 unset($_SESSION['flash_message'], $_SESSION['flash_type']);
 
 if (empty($_SESSION['csrf_token'])) {
@@ -93,6 +104,56 @@ if ($moduleKey === 'historial_ventas') {
     exit;
 }
 
+if ($moduleKey === 'historial_precios') {
+    $historyService = new PriceHistoryService(new PriceHistoryRepository($connection));
+    $filterInput = [
+        'producto' => $_GET['producto'] ?? '',
+        'fecha_inicio' => $_GET['fecha_inicio'] ?? '',
+        'fecha_fin' => $_GET['fecha_fin'] ?? '',
+    ];
+    [$filters, $filterErrors] = $historyService->validateFilters($filterInput);
+    $historyRecords = [];
+    $historyError = null;
+
+    if (!$filterErrors) {
+        try {
+            $historyRecords = $historyService->search($filters);
+        } catch (Throwable $exception) {
+            error_log('Error al consultar el historial de precios: ' . $exception->getMessage());
+            $historyError = 'No se pudo consultar el historial de precios. Verifica la conexión e inténtalo nuevamente.';
+        }
+    }
+
+    $modules = $service->modules();
+    $module = $service->getModule('historial_precios');
+    require __DIR__ . '/app/Views/price_history.php';
+    exit;
+}
+
+if ($moduleKey === 'ubicaciones') {
+    $filterInput = [
+        'busqueda' => $_GET['busqueda'] ?? '',
+        'pasillo' => $_GET['pasillo'] ?? '',
+    ];
+    [$locationFilters, $locationErrors] = $service->validateLocationFilters($filterInput);
+    $locationProducts = [];
+    $locationError = null;
+
+    if (!$locationErrors) {
+        try {
+            $locationProducts = $service->searchProductsForLocations($locationFilters);
+        } catch (Throwable $exception) {
+            error_log('Error al consultar las ubicaciones de productos: ' . $exception->getMessage());
+            $locationError = 'No se pudieron consultar los productos. Verifica la conexión e inténtalo nuevamente.';
+        }
+    }
+
+    $modules = $service->modules();
+    $module = $service->getModule('ubicaciones');
+    require __DIR__ . '/app/Views/locations.php';
+    exit;
+}
+
 if ($moduleKey === 'ventas') {
     $salesService = new SalesService(new SalesRepository($connection));
     $salesModule = $service->getModule('ventas');
@@ -134,6 +195,101 @@ if ($moduleKey === 'ventas') {
     $module = $salesModule;
     $csrfToken = $_SESSION['csrf_token'];
     require __DIR__ . '/app/Views/sales.php';
+    exit;
+}
+
+if ($moduleKey === 'precios') {
+    $errors = [];
+    $searchResults = [];
+    $selectedProduct = null;
+    $searchInput = $_SERVER['REQUEST_METHOD'] === 'POST'
+        ? ($_POST['busqueda'] ?? '')
+        : ($_GET['busqueda'] ?? '');
+    $searchTerm = '';
+
+    if (!is_string($searchInput)) {
+        $errors['busqueda'] = 'El texto de búsqueda no tiene un formato válido.';
+    } else {
+        $searchTerm = trim($searchInput);
+    }
+
+    $rawProductId = $_SERVER['REQUEST_METHOD'] === 'POST'
+        ? ($_POST['id_producto'] ?? null)
+        : ($_GET['id'] ?? null);
+    $selectedProductId = null;
+    if ($rawProductId !== null && $rawProductId !== '') {
+        $selectedProductId = is_string($rawProductId)
+            ? filter_var($rawProductId, FILTER_VALIDATE_INT)
+            : false;
+        if ($selectedProductId === false || $selectedProductId < 1) {
+            $selectedProductId = null;
+            $errors['_form'] = 'Selecciona un producto válido.';
+        }
+    }
+
+    $newPrice = $_SERVER['REQUEST_METHOD'] === 'POST'
+        ? ($_POST['precio_nuevo'] ?? '')
+        : '';
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $submittedToken = $_POST['csrf_token'] ?? '';
+        if (!is_string($submittedToken) || !hash_equals($_SESSION['csrf_token'], $submittedToken)) {
+            $errors['_form'] = 'La sesión del formulario venció. Recarga la página e inténtalo de nuevo.';
+        } elseif (($_POST['_accion'] ?? '') !== 'actualizar_precio') {
+            $errors['_form'] = 'La operación solicitada no es válida.';
+        } elseif ($selectedProductId === null) {
+            $errors['_form'] = 'Selecciona un producto válido.';
+        } else {
+            try {
+                $priceService->updatePrice((int) $selectedProductId, $newPrice);
+                $_SESSION['flash_message'] = 'El precio del producto se actualizó correctamente.';
+                $_SESSION['flash_type'] = 'success';
+                $redirectParameters = ['modulo' => 'precios', 'id' => $selectedProductId];
+                if ($searchTerm !== '') {
+                    $redirectParameters['busqueda'] = $searchTerm;
+                }
+                header('Location: ?' . http_build_query($redirectParameters), true, 303);
+                exit;
+            } catch (PriceValidationException $exception) {
+                $errors['precio_nuevo'] = $exception->getMessage();
+            } catch (PriceProductNotFoundException $exception) {
+                $errors['_form'] = $exception->getMessage();
+            } catch (Throwable $exception) {
+                error_log('Error al actualizar el precio del producto: ' . $exception->getMessage());
+                $errors['_form'] = 'No se pudo actualizar el precio. No se guardaron cambios; inténtalo nuevamente.';
+            }
+        }
+    }
+
+    if ($selectedProductId !== null) {
+        try {
+            $selectedProduct = $service->findProduct((int) $selectedProductId);
+            if ($selectedProduct === null) {
+                http_response_code(404);
+                $errors['_form'] = 'El producto solicitado ya no existe. Vuelve a buscarlo.';
+            }
+        } catch (Throwable $exception) {
+            error_log('Error al cargar producto para actualizar su precio: ' . $exception->getMessage());
+            http_response_code(500);
+            $errors['_form'] = 'No se pudo cargar el producto. Verifica la conexión e inténtalo nuevamente.';
+        }
+    }
+
+    if ($searchTerm !== '' && !isset($errors['busqueda'])) {
+        try {
+            $searchResults = $priceService->searchProducts($searchTerm);
+        } catch (PriceValidationException $exception) {
+            $errors['busqueda'] = $exception->getMessage();
+        } catch (Throwable $exception) {
+            error_log('Error al buscar productos para actualizar precios: ' . $exception->getMessage());
+            $errors['_form'] = 'No se pudieron consultar los productos. Verifica la conexión e inténtalo nuevamente.';
+        }
+    }
+
+    $modules = $service->modules();
+    $module = $service->getModule('precios');
+    $csrfToken = $_SESSION['csrf_token'];
+    require __DIR__ . '/app/Views/prices.php';
     exit;
 }
 

@@ -20,6 +20,17 @@ class CatalogRepository
         'id_proveedor' => 'proveedor',
     ];
 
+    private const PRODUCT_UPDATE_FIELDS = [
+        'nombre',
+        'descripcion',
+        'precio_compra',
+        'precio_venta',
+        'stock',
+        'id_categoria',
+        'id_marca',
+        'id_proveedor',
+    ];
+
     private PDO $connection;
 
     public function __construct(PDO $connection)
@@ -140,6 +151,41 @@ class CatalogRepository
         return $statement->fetchAll();
     }
 
+    public function searchProductsForLocations(array $filters): array
+    {
+        $conditions = [];
+        $parameters = [];
+
+        if ($filters['busqueda'] !== '') {
+            $escapedName = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $filters['busqueda']);
+            if ($filters['id_producto'] !== null) {
+                $conditions[] = '(p.`id` = :id_producto OR p.`nombre` LIKE :nombre ESCAPE \'!\')';
+                $parameters[':id_producto'] = $filters['id_producto'];
+            } else {
+                $conditions[] = 'p.`nombre` LIKE :nombre ESCAPE \'!\'';
+            }
+            $parameters[':nombre'] = '%' . $escapedName . '%';
+        }
+
+        if ($filters['pasillo'] !== '') {
+            $conditions[] = 'p.`pasillo` = :pasillo';
+            $parameters[':pasillo'] = $filters['pasillo'];
+        }
+
+        $where = $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';
+        $statement = $this->connection->prepare(
+            'SELECT p.`id`, p.`nombre`, c.`nombre` AS `categoria`, '
+            . 'p.`pasillo`, p.`estante`, p.`stock` '
+            . 'FROM `producto` p '
+            . 'INNER JOIN `categoria` c ON c.`id` = p.`id_categoria`'
+            . $where
+            . ' ORDER BY p.`id` DESC'
+        );
+        $statement->execute($parameters);
+
+        return $statement->fetchAll();
+    }
+
     public function findProduct(int $id): ?array
     {
         $statement = $this->connection->prepare(
@@ -153,17 +199,173 @@ class CatalogRepository
         return $product === false ? null : $product;
     }
 
-    public function updateProduct(int $id, array $values): bool
+    public function findProductsForPriceById(int $id): array
     {
         $statement = $this->connection->prepare(
-            'UPDATE `producto` SET `nombre` = :nombre, `descripcion` = :descripcion, '
-            . '`precio_compra` = :precio_compra, `precio_venta` = :precio_venta, `stock` = :stock, '
-            . '`id_categoria` = :id_categoria, `id_marca` = :id_marca, `id_proveedor` = :id_proveedor '
-            . 'WHERE `id` = :id'
+            'SELECT `id`, `nombre`, `precio_venta` FROM `producto` WHERE `id` = :id'
         );
-        $statement->execute($values + [':id' => $id]);
+        $statement->execute([':id' => $id]);
 
-        return $this->findProduct($id) !== null;
+        return $statement->fetchAll();
+    }
+
+    public function searchProductsForPriceByName(string $name): array
+    {
+        $escapedName = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $name);
+        $statement = $this->connection->prepare(
+            'SELECT `id`, `nombre`, `precio_venta` FROM `producto` '
+            . 'WHERE `nombre` LIKE :nombre ESCAPE \'!\' '
+            . 'ORDER BY `id` DESC LIMIT 50'
+        );
+        $statement->execute([':nombre' => '%' . $escapedName . '%']);
+
+        return $statement->fetchAll();
+    }
+
+    public function updateProduct(int $id, array $values): bool
+    {
+        $result = $this->saveProductChanges($id, $values);
+
+        return $result['exists'];
+    }
+
+    public function updateProductPrice(int $id, string $price): array
+    {
+        return $this->saveProductChanges($id, ['precio_venta' => $price]);
+    }
+
+    protected function insertPriceHistory(
+        int $productId,
+        string $productName,
+        ?string $previousPrice,
+        ?string $newPrice
+    ): void {
+        $statement = $this->connection->prepare(
+            'INSERT INTO `historial_precio` '
+            . '(`id_producto`, `codigo_producto`, `nombre_producto`, `precio_anterior`, `precio_nuevo`, `area_responsable`) '
+            . 'VALUES (:producto, :codigo, :nombre, :precio_anterior, :precio_nuevo, :area)'
+        );
+        $statement->execute([
+            ':producto' => $productId,
+            ':codigo' => $productId,
+            ':nombre' => $productName,
+            ':precio_anterior' => $previousPrice,
+            ':precio_nuevo' => $newPrice,
+            ':area' => 'Administrador',
+        ]);
+    }
+
+    private function saveProductChanges(int $id, array $values): array
+    {
+        if ($id < 1 || !$values || array_diff(array_keys($values), self::PRODUCT_UPDATE_FIELDS)) {
+            throw new \InvalidArgumentException('Los datos de actualización del producto no son válidos.');
+        }
+
+        return $this->transaction(function () use ($id, $values): array {
+            $lock = $this->connection->prepare(
+                'SELECT `id`, `nombre`, `precio_venta` FROM `producto` WHERE `id` = :id FOR UPDATE'
+            );
+            $lock->execute([':id' => $id]);
+            $current = $lock->fetch();
+            if ($current === false) {
+                return ['exists' => false, 'price_changed' => false];
+            }
+
+            $priceChanged = false;
+            $previousPrice = $current['precio_venta'];
+            $newPrice = $previousPrice;
+            if (array_key_exists('precio_venta', $values)) {
+                $newPrice = $values['precio_venta'];
+                if ($newPrice !== null && !is_string($newPrice)) {
+                    throw new \InvalidArgumentException('El precio de venta no tiene un formato válido.');
+                }
+                $priceChanged = $this->priceToCents($previousPrice) !== $this->priceToCents($newPrice);
+                if (!$priceChanged && count($values) === 1) {
+                    return ['exists' => true, 'price_changed' => false];
+                }
+            }
+
+            $assignments = [];
+            $parameters = [':id' => $id];
+            foreach ($values as $field => $value) {
+                $assignments[] = '`' . $field . '` = :' . $field;
+                $parameters[':' . $field] = $value;
+            }
+            $update = $this->connection->prepare(
+                'UPDATE `producto` SET ' . implode(', ', $assignments) . ' WHERE `id` = :id'
+            );
+            $update->execute($parameters);
+
+            if ($priceChanged) {
+                $product = $this->connection->prepare(
+                    'SELECT `nombre` FROM `producto` WHERE `id` = :id'
+                );
+                $product->execute([':id' => $id]);
+                $productName = $product->fetchColumn();
+                if (!is_string($productName)) {
+                    throw new RuntimeException('No se pudo recuperar el producto actualizado para registrar el historial.');
+                }
+
+                $this->insertPriceHistory($id, $productName, $previousPrice, $newPrice);
+            }
+
+            return ['exists' => true, 'price_changed' => $priceChanged];
+        });
+    }
+
+    private function transaction(callable $operation): array
+    {
+        $ownsTransaction = !$this->connection->inTransaction();
+        $savepoint = 'catalog_price_update';
+
+        if ($ownsTransaction) {
+            $this->connection->beginTransaction();
+        } else {
+            $this->connection->exec('SAVEPOINT ' . $savepoint);
+        }
+
+        try {
+            $result = $operation();
+            if ($ownsTransaction) {
+                $this->connection->commit();
+            } else {
+                $this->connection->exec('RELEASE SAVEPOINT ' . $savepoint);
+            }
+
+            return $result;
+        } catch (\Throwable $exception) {
+            if ($ownsTransaction && $this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            } elseif ($this->connection->inTransaction()) {
+                $this->connection->exec('ROLLBACK TO SAVEPOINT ' . $savepoint);
+                $this->connection->exec('RELEASE SAVEPOINT ' . $savepoint);
+            }
+
+            throw $exception;
+        }
+    }
+
+    private function priceToCents(?string $price): ?int
+    {
+        if ($price === null) {
+            return null;
+        }
+        if (!preg_match('/^-?\d+(?:\.\d{1,2})?$/D', $price)) {
+            throw new \InvalidArgumentException('El precio de venta almacenado no tiene un formato válido.');
+        }
+
+        $negative = str_starts_with($price, '-');
+        $unsignedPrice = $negative ? substr($price, 1) : $price;
+        [$whole, $fraction] = array_pad(explode('.', $unsignedPrice, 2), 2, '');
+        $whole = ltrim($whole, '0');
+        $whole = $whole === '' ? '0' : $whole;
+        if (strlen($whole) > 8) {
+            throw new \InvalidArgumentException('El precio de venta excede la precisión permitida.');
+        }
+
+        $cents = ((int) $whole * 100) + (int) str_pad($fraction, 2, '0');
+
+        return $negative ? -$cents : $cents;
     }
 
     public function delete(string $table, int $id): bool

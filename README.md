@@ -9,25 +9,36 @@ Sistema de información para apoyar el control de inventario y las ventas de una
 - HU01 y HU02 implementadas: catálogo con búsqueda/filtros y edición de los campos documentados.
 - HU06–HU09 de Sprint 2 implementadas: eliminaciones seguras, clientes, métodos de pago y ventas con descuento transaccional de existencias.
 - HU10 implementada: historial de ventas y consulta de detalle por folio con precios históricos y operaciones de solo lectura.
+- HU11 de Sprint 3 implementada: actualización de precios con auditoría transaccional desde el módulo Precios y el catálogo.
+- HU12 de Sprint 3 implementada: consulta de historial de precios por producto y rango de fechas.
+- HU13 de Sprint 3 implementada: consulta de productos por código/nombre y filtro de pasillo, sin operaciones de escritura.
 - Formularios con validación en cliente y servidor, persistencia PDO, protección CSRF y rechazo de duplicados.
 - Interfaces HTML con estilos en CSS y mejoras de interacción en JavaScript.
 
 ## Estructura del proyecto
 - `app/Database.php`: encapsula la conexión a MySQL y la validación del esquema.
 - `app/Repositories/CatalogRepository.php`: consultas parametrizadas para listar y guardar registros.
-- `app/Services/CatalogService.php`: definición de módulos y validaciones de negocio.
+- `app/Repositories/PriceHistoryRepository.php`: consulta parametrizada del historial de precios.
+- `app/Services/CatalogService.php`, `PriceService.php` y `PriceHistoryService.php`: módulos y validaciones de negocio.
+- `app/Repositories/CatalogRepository.php` y `app/Services/CatalogService.php` incluyen la consulta de ubicaciones y validación de filtros.
 - `app/Views/catalog.php`: formularios, mensajes y listados compartidos.
+- `app/Views/prices.php`: búsqueda y actualización de precios.
+- `app/Views/price_history.php`: consulta filtrable del historial de precios.
+- `app/Views/locations.php`: consulta de pasillo, estante y existencias.
 - `app/Repositories/SalesRepository.php` y `app/Services/SalesService.php`: persistencia transaccional de ventas e inventario.
 - `app/Views/sales.php`: formulario de ventas con selección de cliente, método y productos.
 - `assets/css/styles.css`: estilos responsivos de los módulos.
 - `assets/js/app.js`: contadores de caracteres y prevención de envíos duplicados.
 - `assets/js/sales.js`: líneas dinámicas y vista previa de importes recalculados en el servidor.
 - `config/database.php`: configuración de conexión para XAMPP.
-- `database/schema.sql`: esquema de referencia para catálogos, clientes, métodos de pago, ventas y detalle.
+- `database/schema.sql`: esquema de referencia para catálogos, historial de precios, ubicaciones, ventas y detalle.
 - `database/migrations/`: migraciones aditivas para actualizar bases existentes sin reinicializarlas.
 - `database/init_db.php`: crea la base de datos y ejecuta el esquema.
 - `database/validate_db.php`: verifica tablas y relaciones foráneas.
 - `database/test_catalog_modules.php`: comprobaciones de persistencia y validaciones.
+- `database/test_price_updates.php`: comprobaciones transaccionales de HU11 y su integración con el catálogo.
+- `database/test_price_history.php`: pruebas de consulta, filtros, orden, snapshots y valores nulos de HU12.
+- `database/test_locations.php`: pruebas de búsqueda, filtro por pasillo, productos sin ubicación y conservación de datos.
 - `index.php`: punto de entrada web para los módulos de administración, productos y ventas.
 
 ## Documentación
@@ -54,8 +65,11 @@ Sistema de información para apoyar el control de inventario y las ventas de una
    `php database/test_sales.php`
    `php database/test_sales_history.php`
    `php database/test_catalog_deletions.php`
+   `php database/test_price_updates.php`
+   `php database/test_price_history.php`
+   `php database/test_locations.php`
 
-Abre `http://localhost/FerreteriaOriental/` y selecciona Categorías, Marcas, Proveedores, Productos, Clientes, Métodos de pago, Ventas o Historial de ventas. El módulo Productos permite registrar, consultar, filtrar, editar y eliminar productos. Para registrar productos, primero debe existir al menos una categoría, marca y proveedor. La configuración usa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` si están definidas; el puerto local predeterminado de este proyecto es 3307.
+Abre `http://localhost/FerreteriaOriental/` y selecciona Categorías, Marcas, Proveedores, Productos, Clientes, Métodos de pago, Ventas, Historial de ventas, Precios, Historial de precios o Ubicaciones. El módulo Productos permite registrar, consultar, filtrar, editar y eliminar productos; los cambios efectivos de precio también quedan auditados. Ubicaciones es de solo lectura y muestra «Sin ubicación» cuando pasillo o estante están ausentes. Para registrar productos, primero debe existir al menos una categoría, marca y proveedor. La configuración usa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` si están definidas; el puerto local predeterminado de este proyecto es 3307.
 
 ## Documentación del Sprint 2
 

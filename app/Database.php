@@ -89,6 +89,7 @@ class Database
             'marca',
             'proveedor',
             'producto',
+            'historial_precio',
             'cliente',
             'metodo_pago',
             'venta',
