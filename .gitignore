@@ -17,3 +17,4 @@ desktop.ini
 # Copias de seguridad
 *.bak
 *.old
+/vendor/
