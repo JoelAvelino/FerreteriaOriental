@@ -1,0 +1,946 @@
+{
+  "_type": "Project",
+  "_id": "AAAAAAGR00000000000001",
+  "name": "Sistema de Precios y Ubicacion",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "_id": "AAAAAAGR00000000000002",
+      "_parent": {
+        "$ref": "AAAAAAGR00000000000001"
+      },
+      "name": "Modelo",
+      "ownedElements": [
+        {
+          "_type": "UMLClassDiagram",
+          "_id": "AAAAAAGR00000000000003",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "Diagrama de Clases",
+          "defaultDiagram": true,
+          "ownedViews": [
+            {
+              "_type": "UMLClassView",
+              "_id": "AAAAAAGR00000000000007",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000004"
+              },
+              "font": "Arial;13;0",
+              "left": 1070,
+              "top": 65,
+              "width": 220,
+              "height": 90
+            },
+            {
+              "_type": "UMLClassView",
+              "_id": "AAAAAAGR00000000000016",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000008"
+              },
+              "font": "Arial;13;0",
+              "left": 51,
+              "top": 375,
+              "width": 558,
+              "height": 90
+            },
+            {
+              "_type": "UMLClassView",
+              "_id": "AAAAAAGR00000000000021",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000017"
+              },
+              "font": "Arial;13;0",
+              "left": 1675,
+              "top": 383,
+              "width": 450,
+              "height": 74
+            },
+            {
+              "_type": "UMLClassView",
+              "_id": "AAAAAAGR00000000000034",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000022"
+              },
+              "font": "Arial;13;0",
+              "left": 112,
+              "top": 683,
+              "width": 436,
+              "height": 154
+            },
+            {
+              "_type": "UMLClassView",
+              "_id": "AAAAAAGR00000000000052",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "font": "Arial;13;0",
+              "left": 1002,
+              "top": 659,
+              "width": 356,
+              "height": 202
+            },
+            {
+              "_type": "UMLClassView",
+              "_id": "AAAAAAGR00000000000061",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000053"
+              },
+              "font": "Arial;13;0",
+              "left": 1754,
+              "top": 691,
+              "width": 292,
+              "height": 138
+            },
+            {
+              "_type": "UMLGeneralizationView",
+              "_id": "AAAAAAGR00000000000063",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000062"
+              },
+              "tail": {
+                "$ref": "AAAAAAGR00000000000016"
+              },
+              "head": {
+                "$ref": "AAAAAAGR00000000000007"
+              },
+              "points": "330:375;330:265;1147:265;1147:155"
+            },
+            {
+              "_type": "UMLGeneralizationView",
+              "_id": "AAAAAAGR00000000000065",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000064"
+              },
+              "tail": {
+                "$ref": "AAAAAAGR00000000000021"
+              },
+              "head": {
+                "$ref": "AAAAAAGR00000000000007"
+              },
+              "points": "1900:383;1900:265;1213:265;1213:155"
+            },
+            {
+              "_type": "UMLAssociationView",
+              "_id": "AAAAAAGR00000000000069",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000066"
+              },
+              "tail": {
+                "$ref": "AAAAAAGR00000000000016"
+              },
+              "head": {
+                "$ref": "AAAAAAGR00000000000034"
+              },
+              "points": "330:465;330:683"
+            },
+            {
+              "_type": "UMLAssociationView",
+              "_id": "AAAAAAGR00000000000073",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000070"
+              },
+              "tail": {
+                "$ref": "AAAAAAGR00000000000016"
+              },
+              "head": {
+                "$ref": "AAAAAAGR00000000000052"
+              },
+              "points": "609:420;1180:420;1180:659"
+            },
+            {
+              "_type": "UMLAssociationView",
+              "_id": "AAAAAAGR00000000000077",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000074"
+              },
+              "tail": {
+                "$ref": "AAAAAAGR00000000000021"
+              },
+              "head": {
+                "$ref": "AAAAAAGR00000000000061"
+              },
+              "points": "1900:457;1900:691"
+            },
+            {
+              "_type": "UMLAssociationView",
+              "_id": "AAAAAAGR00000000000081",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000078"
+              },
+              "tail": {
+                "$ref": "AAAAAAGR00000000000052"
+              },
+              "head": {
+                "$ref": "AAAAAAGR00000000000034"
+              },
+              "points": "1002:760;548:760"
+            },
+            {
+              "_type": "UMLAssociationView",
+              "_id": "AAAAAAGR00000000000085",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000003"
+              },
+              "model": {
+                "$ref": "AAAAAAGR00000000000082"
+              },
+              "tail": {
+                "$ref": "AAAAAAGR00000000000052"
+              },
+              "head": {
+                "$ref": "AAAAAAGR00000000000061"
+              },
+              "points": "1358:760;1754:760"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClass",
+          "_id": "AAAAAAGR00000000000004",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "Usuario",
+          "documentation": "Clase base. Agrupa los datos comunes de las personas que usan el sistema.",
+          "ownedElements": [],
+          "attributes": [
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000005",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000004"
+              },
+              "name": "id",
+              "visibility": "private",
+              "type": "int"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000006",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000004"
+              },
+              "name": "nombre",
+              "visibility": "private",
+              "type": "String"
+            }
+          ],
+          "operations": [],
+          "isAbstract": true
+        },
+        {
+          "_type": "UMLClass",
+          "_id": "AAAAAAGR00000000000008",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "Administrador",
+          "documentation": "Actor que actualiza precios de productos y consulta el historial de cambios de precio.",
+          "ownedElements": [
+            {
+              "_type": "UMLGeneralization",
+              "_id": "AAAAAAGR00000000000062",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000008"
+              },
+              "source": {
+                "$ref": "AAAAAAGR00000000000008"
+              },
+              "target": {
+                "$ref": "AAAAAAGR00000000000004"
+              }
+            }
+          ],
+          "attributes": [],
+          "operations": [
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000009",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000008"
+              },
+              "name": "actualizarPrecioProducto",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000010",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000009"
+                  },
+                  "name": "idProducto",
+                  "type": "int"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000011",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000009"
+                  },
+                  "name": "nuevoPrecio",
+                  "type": "double"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000012",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000009"
+                  },
+                  "type": "void",
+                  "direction": "return"
+                }
+              ]
+            },
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000013",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000008"
+              },
+              "name": "consultarHistorialCambiosPrecio",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000014",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000013"
+                  },
+                  "name": "idProducto",
+                  "type": "int"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000015",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000013"
+                  },
+                  "type": "List<HistorialCambio>",
+                  "direction": "return"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_type": "UMLClass",
+          "_id": "AAAAAAGR00000000000017",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "Almacenista",
+          "documentation": "Actor que consulta en que lugar del almacen se encuentra cada producto.",
+          "ownedElements": [
+            {
+              "_type": "UMLGeneralization",
+              "_id": "AAAAAAGR00000000000064",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000017"
+              },
+              "source": {
+                "$ref": "AAAAAAGR00000000000017"
+              },
+              "target": {
+                "$ref": "AAAAAAGR00000000000004"
+              }
+            }
+          ],
+          "attributes": [],
+          "operations": [
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000018",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000017"
+              },
+              "name": "consultarUbicacionProductos",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000019",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000018"
+                  },
+                  "name": "criterio",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000020",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000018"
+                  },
+                  "type": "Ubicacion",
+                  "direction": "return"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_type": "UMLClass",
+          "_id": "AAAAAAGR00000000000022",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "HistorialCambio",
+          "documentation": "Registro de cada cambio de precio: precio anterior, precio nuevo y fecha.",
+          "ownedElements": [],
+          "attributes": [
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000023",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000022"
+              },
+              "name": "id",
+              "visibility": "private",
+              "type": "int"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000024",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000022"
+              },
+              "name": "precioAnterior",
+              "visibility": "private",
+              "type": "double"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000025",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000022"
+              },
+              "name": "precioNuevo",
+              "visibility": "private",
+              "type": "double"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000026",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000022"
+              },
+              "name": "fechaCambio",
+              "visibility": "private",
+              "type": "Date"
+            }
+          ],
+          "operations": [
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000027",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000022"
+              },
+              "name": "buscar",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000028",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000027"
+                  },
+                  "name": "idProducto",
+                  "type": "int"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000029",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000027"
+                  },
+                  "type": "List<HistorialCambio>",
+                  "direction": "return"
+                }
+              ]
+            },
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000030",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000022"
+              },
+              "name": "registrarCambio",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000031",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000030"
+                  },
+                  "name": "anterior",
+                  "type": "double"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000032",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000030"
+                  },
+                  "name": "nuevo",
+                  "type": "double"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000033",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000030"
+                  },
+                  "type": "void",
+                  "direction": "return"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_type": "UMLClass",
+          "_id": "AAAAAAGR00000000000035",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "Producto",
+          "documentation": "Articulo del inventario. Valida y actualiza su precio; si falla, el precio no cambia.",
+          "ownedElements": [],
+          "attributes": [
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000036",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "id",
+              "visibility": "private",
+              "type": "int"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000037",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "codigo",
+              "visibility": "private",
+              "type": "String"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000038",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "nombre",
+              "visibility": "private",
+              "type": "String"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000039",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "precio",
+              "visibility": "private",
+              "type": "double"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000040",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "stock",
+              "visibility": "private",
+              "type": "int"
+            }
+          ],
+          "operations": [
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000041",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "buscar",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000042",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000041"
+                  },
+                  "name": "criterio",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000043",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000041"
+                  },
+                  "type": "Producto",
+                  "direction": "return"
+                }
+              ]
+            },
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000044",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "consultarProductos",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000045",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000044"
+                  },
+                  "type": "List<Producto>",
+                  "direction": "return"
+                }
+              ]
+            },
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000046",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "validarPrecio",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000047",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000046"
+                  },
+                  "name": "nuevoPrecio",
+                  "type": "double"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000048",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000046"
+                  },
+                  "type": "boolean",
+                  "direction": "return"
+                }
+              ]
+            },
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000049",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000035"
+              },
+              "name": "actualizarPrecio",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000050",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000049"
+                  },
+                  "name": "nuevoPrecio",
+                  "type": "double"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000051",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000049"
+                  },
+                  "type": "void",
+                  "direction": "return"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_type": "UMLClass",
+          "_id": "AAAAAAGR00000000000053",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "Ubicacion",
+          "documentation": "Lugar fisico del producto en el almacen (pasillo, estante y nivel).",
+          "ownedElements": [],
+          "attributes": [
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000054",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000053"
+              },
+              "name": "id",
+              "visibility": "private",
+              "type": "int"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000055",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000053"
+              },
+              "name": "pasillo",
+              "visibility": "private",
+              "type": "String"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000056",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000053"
+              },
+              "name": "estante",
+              "visibility": "private",
+              "type": "String"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "AAAAAAGR00000000000057",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000053"
+              },
+              "name": "nivel",
+              "visibility": "private",
+              "type": "String"
+            }
+          ],
+          "operations": [
+            {
+              "_type": "UMLOperation",
+              "_id": "AAAAAAGR00000000000058",
+              "_parent": {
+                "$ref": "AAAAAAGR00000000000053"
+              },
+              "name": "buscar",
+              "visibility": "public",
+              "parameters": [
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000059",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000058"
+                  },
+                  "name": "idProducto",
+                  "type": "int"
+                },
+                {
+                  "_type": "UMLParameter",
+                  "_id": "AAAAAAGR00000000000060",
+                  "_parent": {
+                    "$ref": "AAAAAAGR00000000000058"
+                  },
+                  "type": "Ubicacion",
+                  "direction": "return"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_type": "UMLAssociation",
+          "_id": "AAAAAAGR00000000000066",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "consulta",
+          "end1": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000067",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000066"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000008"
+            },
+            "multiplicity": "1"
+          },
+          "end2": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000068",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000066"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000022"
+            },
+            "multiplicity": "*"
+          }
+        },
+        {
+          "_type": "UMLAssociation",
+          "_id": "AAAAAAGR00000000000070",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "actualiza",
+          "end1": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000071",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000070"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000008"
+            },
+            "multiplicity": "1"
+          },
+          "end2": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000072",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000070"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000035"
+            },
+            "multiplicity": "*"
+          }
+        },
+        {
+          "_type": "UMLAssociation",
+          "_id": "AAAAAAGR00000000000074",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "consulta",
+          "end1": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000075",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000074"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000017"
+            },
+            "multiplicity": "1"
+          },
+          "end2": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000076",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000074"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000053"
+            },
+            "multiplicity": "*"
+          }
+        },
+        {
+          "_type": "UMLAssociation",
+          "_id": "AAAAAAGR00000000000078",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "tiene",
+          "end1": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000079",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000078"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000035"
+            },
+            "multiplicity": "1"
+          },
+          "end2": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000080",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000078"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000022"
+            },
+            "multiplicity": "*"
+          }
+        },
+        {
+          "_type": "UMLAssociation",
+          "_id": "AAAAAAGR00000000000082",
+          "_parent": {
+            "$ref": "AAAAAAGR00000000000002"
+          },
+          "name": "se ubica en",
+          "end1": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000083",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000082"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000035"
+            },
+            "multiplicity": "*"
+          },
+          "end2": {
+            "_type": "UMLAssociationEnd",
+            "_id": "AAAAAAGR00000000000084",
+            "_parent": {
+              "$ref": "AAAAAAGR00000000000082"
+            },
+            "reference": {
+              "$ref": "AAAAAAGR00000000000053"
+            },
+            "multiplicity": "1"
+          }
+        }
+      ]
+    }
+  ]
+}
